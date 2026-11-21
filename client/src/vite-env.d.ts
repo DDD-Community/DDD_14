@@ -1,7 +1,9 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** API 서버 base URL (예: http://localhost:8080) */
+  /** 실행 환경. local = 로컬 개발, prod = 프로덕션 */
+  readonly VITE_APP_ENV: 'local' | 'prod';
+  /** API 서버 base URL */
   readonly VITE_API_BASE_URL: string;
 }
 
