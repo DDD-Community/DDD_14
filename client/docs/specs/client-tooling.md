@@ -7,18 +7,20 @@
 | 항목           | 도구                                                               | 설정 파일                             |
 | -------------- | ------------------------------------------------------------------ | ------------------------------------- |
 | 패키지 매니저  | pnpm                                                               | `pnpm-lock.yaml`                      |
-| 빌드/개발 서버 | Vite + `@vitejs/plugin-react`                                      | `vite.config.ts`                      |
+| 빌드/개발 서버 | Vite + `@vitejs/plugin-react`, `@tailwindcss/vite`                 | `vite.config.ts`                      |
 | 언어           | TypeScript `~7.0`                                                  | `tsconfig*.json`                      |
 | Lint           | oxlint (`react`, `typescript`, `oxc` 플러그인)                     | `.oxlintrc.json`                      |
 | Format         | Prettier (세미콜론, 작은따옴표, trailingComma all, printWidth 100) | `.prettierrc.json`, `.prettierignore` |
 
 ## 주요 라이브러리
 
-| 용도            | 라이브러리 | 비고                              |
-| --------------- | ---------- | --------------------------------- |
-| HTTP            | axios      |                                   |
-| 클라이언트 상태 | zustand    |                                   |
-| 날짜            | date-fns   | 한국어는 `date-fns/locale`의 `ko` |
+| 용도            | 라이브러리                | 비고                                      |
+| --------------- | ------------------------- | ----------------------------------------- |
+| 스타일          | Tailwind CSS v4           | `src/index.css`의 `@import 'tailwindcss'` |
+| className 결합  | `clsx` + `tailwind-merge` | `@/lib/cn`의 `cn()`으로만 사용            |
+| HTTP            | axios                     |                                           |
+| 클라이언트 상태 | zustand                   |                                           |
+| 날짜            | date-fns                  | 한국어는 `date-fns/locale`의 `ko`         |
 
 ## 경로 별칭
 
