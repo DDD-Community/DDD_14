@@ -1,0 +1,59 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(pnpm add:*)",
+      "Bash(pnpm remove:*)",
+      "Edit(./client/.oxlintrc.json)",
+      "Edit(./client/lint-plugins/**)"
+    ],
+    "deny": [
+      "Read(./client/.env.local)",
+      "Read(./client/.env.*.local)",
+      "Edit(./client/pnpm-lock.yaml)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/session-start.mjs"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/plan-gate.mjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/format-edited-file.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/stop-gate.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
