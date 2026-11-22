@@ -1,2 +1,12 @@
 .serena
-.vscode
+
+# 에디터: 팀 공용 설정(extensions, settings)만 커밋한다
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# 에이전트 개인 설정
+CLAUDE.local.md
+.claude/settings.local.json
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
