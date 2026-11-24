@@ -2,7 +2,8 @@
 """지시문이 가리키는 파일이 있는지 확인한다.
 
 - 지시문은 `.claude/` 아래의 md, `AGENTS.md`, `docs/README.md`다. ADR과 일지는 지운 파일을 기록으로 말하므로 보지 않는다.
-- 백틱 안의 `.md`, `.py`, `.sh`, `.json`으로 끝나는 경로를 모은다. 자리표시(`<…>`, `NN`, `YYYY`, `*`, `{…}`, `$`)는 건너뛴다.
+- 백틱 안의 `.md`, `.py`, `.sh`, `.json`으로 끝나는 경로를 모은다. 자리표시(`<…>`, `NN`, `YYYY`, `*`, `{…}`, `$`)와
+  작업 중에만 생기는 `_workspace/`의 파일은 건너뛴다.
 - 경로는 프로젝트 폴더, `.claude/`, `.claude/skills/`, 그 지시문의 스킬 폴더와 그 `references/`에서 찾는다.
   폴더가 없는 이름(`check.sh`)은 프로젝트 안의 같은 이름의 파일을 찾는다.
 - 찾지 못하면 실패한다.
@@ -55,7 +56,7 @@ def problems():
     for f in instruction_files():
         for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
             for t in TOKEN.findall(line):
-                if not FILE.search(t) or PLACEHOLDER.search(t):
+                if not FILE.search(t) or PLACEHOLDER.search(t) or t.startswith("_workspace/"):
                     continue
                 if not resolves(t, f, names):
                     out.append(f"없는 파일을 가리킨다: {t} ({f.relative_to(ROOT)}:{n})")

@@ -24,7 +24,7 @@ class Refs(unittest.TestCase):
     def test_있는_파일과_자리표시는_통과한다(self):
         self.write(".claude/skills/work/SKILL.md",
                    "`references/plan.md` `shared/커밋과-PR.md` `./scripts/check.sh` `check.sh` "
-                   "`references/<단계>.md` `docs/plan/NN-<슬라이스>.md`\n")
+                   "`references/<단계>.md` `docs/plan/NN-<슬라이스>.md` `_workspace/journal-full.md`\n")
         self.write(".claude/agents/a.md", "`work/references/plan.md` `.claude/skills/work/references/plan.md`\n")
         self.assertEqual(ref_check.problems(), [])
 

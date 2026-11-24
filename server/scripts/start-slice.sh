@@ -12,7 +12,8 @@ proj=${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}
 cd "$proj"
 cur=$(git branch --show-current)
 [ "$cur" = "develop" ] || { echo "develop에서 시작한다. 지금 브랜치: $cur" >&2; exit 1; }
-[ -z "$(git status --porcelain)" ] || { echo "작업 트리가 깨끗하지 않다. 먼저 커밋하거나 정리한다." >&2; exit 1; }
+# 모노레포라 server/ 밖(루트의 .idea/, client/)은 보지 않는다.
+[ -z "$(git status --porcelain -- .)" ] || { echo "server/의 작업 트리가 깨끗하지 않다. 먼저 커밋하거나 정리한다." >&2; exit 1; }
 if git remote get-url origin >/dev/null 2>&1; then
   git fetch -q origin develop
   behind=$(git rev-list --count develop..origin/develop)
