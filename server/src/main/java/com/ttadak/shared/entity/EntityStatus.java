@@ -1,4 +1,4 @@
-package com.ttadak.support.entity;
+package com.ttadak.shared.entity;
 
 public enum EntityStatus {
 

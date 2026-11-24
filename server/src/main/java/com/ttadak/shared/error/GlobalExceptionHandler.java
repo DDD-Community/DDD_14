@@ -1,8 +1,8 @@
-package com.ttadak.support.error;
+package com.ttadak.shared.error;
 
-import com.ttadak.support.response.ApiResponse;
-import com.ttadak.support.response.ErrorMessage;
-import com.ttadak.support.response.ResultType;
+import com.ttadak.shared.response.ApiResponse;
+import com.ttadak.shared.response.ErrorMessage;
+import com.ttadak.shared.response.ResultType;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -42,6 +42,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(errorCode));
     }
+
     /**
      * 입력 검증 실패(VALIDATION_FAILED)는 {@link MethodArgumentNotValidException}으로 오고, 부모가 400 BAD_REQUEST로 응답을 만든다. 본문만
      * {@link ApiResponse}로 바꾼다.
@@ -53,7 +54,9 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpStatusCode status,
         @NonNull WebRequest request
     ) {
-        List<FieldViolation> violations = ex.getBindingResult().getFieldErrors().stream()
+        List<FieldViolation> violations = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
             .map(error -> new FieldViolation(error.getField(), error.getDefaultMessage()))
             .toList();
         ErrorCode errorCode = ErrorCode.DEFAULT_VALIDATION_FAILED;

@@ -28,6 +28,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:3.2.1")
 
     // DB & Migration. 운영 DB 전용 드라이버와 flyway 모듈은 4차 회의에서 DB를 정한 뒤 더한다.
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -60,6 +61,7 @@ spotless {
         target("src/**/*.java")
         eclipse().configFile("config/spotless/eclipse-formatter.xml")
         removeUnusedImports()
+        importOrder("\\#", "")
         trimTrailingWhitespace()
         endWithNewline()
     }

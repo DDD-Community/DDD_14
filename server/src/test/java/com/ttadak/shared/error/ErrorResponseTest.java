@@ -1,5 +1,7 @@
-package com.ttadak.support.error;
+package com.ttadak.shared.error;
 
+import com.ttadak.shared.ControllerSliceTest;
+import com.ttadak.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -8,11 +10,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import com.ttadak.support.WebApiTestSupport;
-import com.ttadak.support.response.ApiResponse;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +21,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@ControllerSliceTest
 @Import(ErrorResponseTest.ErrorProbeController.class)
-class ErrorResponseTest extends WebApiTestSupport {
+class ErrorResponseTest {
+
+    private final MockMvcTester mvcTester;
+
+    ErrorResponseTest(MockMvcTester mvcTester) {
+        this.mvcTester = mvcTester;
+    }
 
     @Test
     void 성공하면_result가_SUCCESS이고_data에_값이_담긴다() {

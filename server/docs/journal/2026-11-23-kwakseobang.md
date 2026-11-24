@@ -426,3 +426,159 @@
 
 **남은 일**:
 - 스텝 17의 남은 일과 같다. 스텝 14~18의 변경을 커밋한다(사용자의 승인 후).
+
+## 스텝 19. 테스트 애너테이션을 만든다
+
+**요청 (사용자)**: "그 테스트 기반 커스텀 어노테이션들 다 만들어주면 될듯? E2E, controller slice, 통합". 이름은 "ControllerSlice는 어때? 통합은 그대로 가고." 이어서 "@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL) 같은 거 넣을거고."
+
+**결정 (사용자)**: 테스트 종류마다 합성 애너테이션을 만든다. 이름은 `@ControllerSliceTest`(표현 계층), `@IntegrationTest`(응용 계층 통합), `@E2ETest`다. 기반 클래스를 상속하는 방식은 쓰지 않는다. 세 애너테이션에 `@TestConstructor(autowireMode = ALL)`을 넣어 테스트 클래스는 생성자 주입을 쓴다.
+
+**한 일 (AI)**:
+1. `src/test/java/com/ttadak/support/`에 `@Covers`(요구사항 ID, 소스 보존), `@ControllerSliceTest`(`@WebMvcTest` + 모든 요청을 허용하는 보안 설정, `controllers`를 `value`로 받는다), `@IntegrationTest`(`@SpringBootTest` + `test` 프로파일), `@E2ETest`(`@SpringBootTest(RANDOM_PORT)` + `test` 프로파일)를 만들었다. 모든 요청을 허용하는 보안 설정은 `SecurityTestConfig`다.
+2. 세 애너테이션에 `@TestConstructor(autowireMode = ALL)`을 넣었다. `WebApiTestSupport`(상속하는 기반 클래스)를 지우고 `ErrorResponseTest`를 `@ControllerSliceTest`와 생성자 주입(`MockMvcTester`)으로 바꿨다.
+3. 임시 확인 테스트로 `@IntegrationTest`가 `test` 프로파일로 앱을 띄우는 것과 `@E2ETest`가 임의의 포트로 띄우는 것, 두 곳 모두 생성자 주입(`@LocalServerPort` 포함)이 되는 것을 확인하고 지웠다. `ErrorResponseTest` 24개가 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- 애너테이션의 이름과 위치(`com.ttadak.support`)는 임시로 정했고 사용자가 이름을 골랐다. 패키지는 패키지 구조를 정할 때 다시 본다.
+- DB 비우기(ADR-0004 E5)와 Testcontainers는 붙이지 않았다. 운영 DB가 정해진 뒤(4차 회의) `@IntegrationTest`와 `@E2ETest`에 JUnit 확장으로 붙인다.
+- 동시성 도우미와 운영 설정 검증 테스트는 쓰는 곳이 없어 만들지 않았다. 필요한 첫 슬라이스에서 만든다.
+- 기존 `ErrorResponseTest`에는 `@Covers`를 달지 않았다. 위키의 요구사항이 아니라 공통 셋팅을 확인하는 테스트다.
+- 애너테이션과 앱의 기동은 상시 테스트로 두지 않았다. 애너테이션이 틀리면 첫 `@IntegrationTest`가 바로 드러낸다.
+
+**관찰**:
+- 애너테이션 방식은 상속을 쓰지 않아서 한 클래스가 기반 클래스 하나에 묶이지 않고, 종류가 테스트 클래스 맨 위에 보인다.
+
+**남은 일**:
+- 스텝 18의 남은 일과 같다. 스텝 19의 변경을 커밋한다(사용자의 승인 후).
+- DB가 정해진 뒤: DB 비우기와 Testcontainers 확장, 운영 설정 검증 테스트.
+- 기준 코드(엔티티와 응답 DTO 예시, Fixture)는 첫 기능에서 만든다.
+
+## 스텝 20. 엔티티와 응답 DTO의 기준 코드를 만든다
+
+**요청 (사용자)**: "음 테스트에 예시 작성해볼까? 예시 엔티티 작성 방법 말이야." AI가 안을 보이자 "일단 만들어봐." 이어서 "도메인 로직 좀 더 추가해주고 그리고 응답엔 of도 해줘. of는 여러 인자 받을 때.", "VO도 추가해주고 그리고 그냥 of랑 from은 하나로 합치면 될듯? 한 클래스에서?"
+
+**결정 (사용자)**: 엔티티와 응답 DTO의 작성 방법은 테스트 소스의 예시 코드로 보인다.
+
+**한 일 (AI)**:
+1. `src/test/java/com/ttadak/sample/`에 세 파일을 만들었다. `Price`(VO)는 `@Embeddable` 레코드이고 만들 때 0 이상인지 검증하며 `plus`, `times`, `isFree` 같은 값 단위의 동작을 가진다. `SampleEntity`는 `BaseEntity`를 상속하고 `protected` 기본 생성자만 두며 매개변수 있는 생성자는 두지 않는다. 정적 팩토리 `create`가 `new`로 만들어 필드를 채우고 돌려준다. 스스로 확인하고 거절하는 `rename`, `decreaseStock`, `increaseStock`, VO를 받는 `changePrice`, VO를 돌려주는 `stockValue`, 질의 메서드 `isSoldOut`을 가진다. `SampleResponse`는 레코드이고 `@Builder(access = PRIVATE)`이며 한 클래스에 `from(entity)`(엔티티 하나)와 `of(여러 값)`(엔티티 없이 값 여러 개로, 조회 전용 쿼리 결과 등)를 둔다. 규칙 번호는 코드에 쓰지 않았고, 사용자가 요청한 `from`과 `of`의 쓰임 주석만 달았다.
+2. 임시 테스트로 엔티티의 저장, 감사 시각, 기본 상태(ACTIVE), VO의 저장과 조회(레코드 `@Embeddable`), 도메인 메서드(재고 감소, 증가, 거절), `from`과 `of`가 동작하는 것을 확인하고 지웠다. 예시는 테스트 대상이 아니라서 상시 테스트를 두지 않았다. `check.sh`가 통과했다.
+
+**결정 (사용자)**: 테스트의 보안 설정 클래스의 이름을 `PermitAllSecurityTestConfig`에서 `SecurityTestConfig`로 바꿨다. IDE의 이름 바꾸기가 스텝 19의 일지 줄도 새 이름으로 고쳤고, 사용자가 "내가 바뀐 걸로 해줘"라고 해서 그대로 뒀다. 일지의 기존 줄을 고치지 않는 규칙의 예외이고, 커밋하면 이 줄이 새 기준이 되어 검사가 다시 통과한다.
+
+**결정 (AI)** (확인이 필요하다):
+- 예시는 `com.ttadak.sample`에 뒀다. 테스트 소스라서 운영 빌드에 들어가지 않고, JPA를 쓰는 테스트는 이 엔티티의 테이블도 만든다.
+- 입력이 틀리면 `CustomException.validation`(`DEFAULT_VALIDATION_FAILED`)을 던지고, 재고가 모자라면 `DEFAULT_CONFLICT`를 던진다. 이 예시가 `DEFAULT_CONFLICT`를 쓰는 기준의 첫 예다. 도메인 객체가 `support`의 예외와 오류 코드를 참조하므로 ADR-0007의 "정하지 않은 것" 1번(도메인 계층이 참조해도 되는지)을 정할 때 다시 본다.
+- 예시 이름과 필드(`name`, `stock`, `price`)는 규칙을 보이기 위한 임의의 값이다. 위키의 정책이나 도메인 용어와 관계없다.
+- ADR-0006의 "코드로 넘긴 규칙" 표에서 C6과 C7의 상태를 바꾸지 않았다. 표의 상태 칸은 C1~C7 모두 초기 셋팅 전으로 남아 있어 사용자가 ADR-0006을 확인할 때 한 번에 갱신한다.
+
+**관찰**:
+- 예시는 코드와 같이 낡는다. 컨벤션이 바뀌면 이 두 파일을 같이 고친다.
+
+**남은 일**:
+- 스텝 19의 남은 일과 같다. 스텝 20의 변경을 커밋한다(사용자의 승인 후).
+- Fixture는 테스트가 처음 필요한 첫 기능에서 만든다.
+
+## 스텝 21. 로컬 로그와 정적 리소스 매핑을 끈다
+
+**요청 (사용자)**: randsome의 `application.yml`(프로파일별 문서와 `config.import`, Tomcat 값, `add-mappings: false`, Jackson 시간대)을 보이며 "이런 식으로 하려 했는데 yml을 어떻게 생각해? 로컬 로그도 하자."
+
+**결정 (사용자)**: 로컬 프로파일에 SQL 로그를 켠다.
+
+**한 일 (AI)**:
+1. `application-local.yml`에 `com.ttadak`의 debug 로그, Hibernate의 SQL 출력(`org.hibernate.SQL: debug`)과 바인딩 값(`org.hibernate.orm.jdbc.bind: trace`), SQL 줄바꿈(`format_sql`)을 더했다.
+2. 의견을 물어서 `add-mappings: false`만 `application.yml`에 가져왔다. 정적 리소스 매핑을 끄는 설정이다. 기존 테스트 24개가 그대로 통과해서, 없는 경로가 계속 `ApiResponse`의 404로 내려가는 것을 확인했다.
+3. 임시 테스트로 `local` 프로파일에서 로그 레벨과 `add-mappings`가 읽히는 것을 확인하고 지웠다. `check.sh`가 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- randsome의 나머지는 가져오지 않았다. 프로파일별 `---` 문서와 `config.import`는 Spring Boot가 `application-{프로파일}.yml`을 자동으로 읽으므로 같은 일을 두 번 쓰게 된다. Tomcat의 `max-connections`와 스레드 값은 부하 테스트로 필요하다고 나온 뒤에 올린다. `jackson.time-zone`은 `Date`, `Instant`, `ZonedDateTime`에만 영향을 주고 `LocalDateTime`에는 효과가 없다.
+- 운영 프로파일의 로그 설정(패턴, 파일, 레벨)은 정하지 않았다. ADR-0006의 "정하지 않은 것" 3번(로그 레벨의 구분)과 ADR-0007의 6번(요청 식별자)이 먼저다.
+
+**관찰**:
+- 기본 프로파일이 `local`이라 운영에서 `SPRING_PROFILES_ACTIVE=prod`를 빠뜨리면 H2와 `ddl-auto: update`로 뜬다. 배포 설정을 만들 때 prod 프로파일을 강제하는 장치를 둔다.
+- 보안 설정이 없어서 앱을 띄우면 Spring Security의 기본값으로 모든 요청이 인증을 요구한다. 인증 방식이 정해질 때(ACC-03) 다룬다.
+
+**남은 일**:
+- 스텝 20의 남은 일과 같다. 스텝 21의 변경을 커밋한다(사용자의 승인 후).
+- 4차 회의 결과의 반영(DB, CI), 하네스 파일의 정리와 충돌 확인(`.gitignore`와 일지).
+
+## 스텝 22. ADR-0006의 코드로 넘긴 규칙 표를 실제 상태에 맞춘다
+
+**요청 (사용자)**: AI가 표의 상태 칸이 전부 "초기 셋팅 전"이라고 짚자 "응".
+
+**결정 (사용자)**: 아직 확정하지 않았다. AI가 고친 표를 보였고, 사용자가 다음 주제(Spotless)로 넘어갔다.
+
+**한 일 (AI)**:
+1. ADR-0006의 "코드로 넘긴 규칙" 표를 C1, C3, C6, C7은 "코드로 대체했다", C2는 "일부 코드로 대체했다"(포매터는 줄바꿈하면 한 줄에 하나씩만 맞추고 줄바꿈 자체는 리뷰), C4와 C5는 "기준 코드가 있다. 확인은 리뷰"로 고쳤다. 기준 코드의 위치(`src/main`의 `BaseEntity`, `src/test`의 `sample`)를 적었고 수정의 줄을 달았다. `docs_lint.py`가 통과했다.
+
+**관찰**:
+- ADR-0006은 하네스 브랜치에서 아직 커밋되지 않은 문서라 제 작업 트리에만 반영되어 있다. 하네스 파일 정리 때 함께 커밋한다.
+
+**남은 일**:
+- 사용자의 확인(표대로 확정할지).
+
+## 스텝 23. Spotless 설정을 더한다
+
+**요청 (사용자)**: "아직 하고 싶은 게 spotless 설정을 더 하고 싶긴 해." AI가 후보를 보이자 "import 순서, 메서드 체인 줄바꿈, 중괄호 안 공백, 빈 줄 규칙 하자. 근데 하기 전에 각각 예시 좀." 예시를 본 뒤 "1번 A, 2번 바꾸자, 3. 공백 없애자, 4. ㄴㄴ 클래스 본문 첫 줄은 빈 줄 맞는데 메서드에서는 빈 줄 없어."
+
+**결정 (사용자)**: import는 알파벳 한 덩어리, 메서드 체인은 넘으면 한 줄에 하나씩, 중괄호 안 공백은 없음, 클래스 본문 첫 줄은 빈 줄이고 메서드 본문 첫 줄은 빈 줄이 없다.
+
+**한 일 (AI)**:
+1. `build.gradle.kts`에 `importOrder("\\#", "")`를 더했다. `static` import는 맨 위에 두고 빈 줄로 나누며, 나머지는 알파벳 한 덩어리다.
+2. `config/spotless/eclipse-formatter.xml`에 더했다: 메서드 체인(`alignment_for_selector_in_method_invocation` 80), 배열 초기화의 중괄호 안 공백 없음, 클래스 본문 첫 줄 빈 줄 1개(`blank_lines_before_first_class_body_declaration`), 클래스 본문 끝 빈 줄 1개(`blank_lines_after_last_class_body_declaration`), 메서드 앞 빈 줄 1개, 연속 빈 줄은 최대 1개.
+3. 체인 값은 처음 48로 했다가 사용자가 직접 끊은 체인의 첫 호출까지 떼어내서(`mvcTester\n.get()`) 80("첫 요소는 필요할 때만 줄바꿈")으로 바꿨다. 적용 전에 `src`를 백업했고, 되돌린 뒤 80으로 다시 적용했다.
+4. 바뀐 파일은 `BaseEntity`, `GlobalExceptionHandler`, `ErrorResponseTest` 세 개다. `ErrorResponseTest`는 import가 정렬됐고, `GlobalExceptionHandler`는 메서드 사이 빈 줄 하나와 체인 줄바꿈이 맞춰졌다. 임시 파일로 각 규칙을 확인하고 지웠다. `check.sh`는 통과한다(일지의 `docs_lint`는 이 스텝을 쓴 뒤에 확인한다).
+
+**결정 (AI)** (확인이 필요하다):
+- 메서드 본문 첫 줄의 빈 줄을 없애는 것은 설정으로 할 수 없다. Eclipse의 "기존 빈 줄 유지" 때문에 `number_of_blank_lines_at_beginning_of_method_body`가 0이어도 남는다. 정규식으로 지울 수 있지만 레코드와 `if` 블록의 첫 줄 빈 줄까지 지운다. 지금 코드에는 메서드 본문 첫 줄의 빈 줄이 없으므로 코드 리뷰가 확인하는 규칙으로 둔다.
+- 중괄호 안 공백은 배열 초기화(`{ElementType.TYPE, ElementType.METHOD}`)만 설정했다. 빈 클래스 본문은 `{\n}`로 정리되고 공백 없는 `{}`로는 맞추지 못한다.
+- 메서드 체인이 길 때 `ex.getBindingResult()` 같은 첫 호출은 앞줄에 붙고 나머지 호출이 한 줄씩 풀린다.
+
+**관찰**:
+- 포매터 옵션의 값은 이름만으로 뜻을 알기 어렵다(48과 80, 49). 값을 고를 때 임시 파일로 먼저 확인한다.
+
+**남은 일**:
+- 스텝 22의 확인. 스텝 21 이후의 변경(스텝 23의 설정과 소스)을 커밋한다(사용자의 승인 후).
+
+## 스텝 24. API 문서(springdoc)와 컨트롤러 문서 분리의 기준 코드
+
+**요청 (사용자)**: 모노레포라 OpenAPI를 쓴다는데 Swagger와 무엇이 다른지, 어노테이션을 붙여야 하는지 물었다. "그동안 다 어노테이션 붙이긴 했는데 그냥 붙여도 되나?", "붙이고 그냥 openapi.json도 쓰는 거야? 아마 커밋할 거 같은데", "일단 추상 클래스로 뺄 거야", "예시만 만들자. SampleControllerDocs로 갈 거야. 네이밍은. 요청 매핑은 컨트롤러에 둘 거고."
+
+**결정 (사용자)**: Swagger 어노테이션을 붙인다. 어노테이션은 추상 클래스 `<이름>ControllerDocs`에 모으고, 요청 매핑은 컨트롤러에 둔다. `openapi.json`은 파일로 만들어 커밋할 것 같다(확정 전, 프런트 쪽 확인 필요).
+
+**한 일 (AI)**:
+1. `springdoc-openapi-starter-webmvc-api:3.2.1`을 넣었다. Spring Boot 4의 모듈 이름을 쓰는 3.x 계열이고, 프런트가 별도 뷰어를 쓴다고 해서 Swagger UI가 없는 `-api` 아티팩트로 정했다.
+2. `src/test/java/com/ttadak/sample/`에 `SampleControllerDocs`(추상 클래스: `@Tag`, `@Operation`, `@Parameter`), `SampleController`(`@RestController`, 요청 매핑과 `@Valid`, `@PathVariable`, `@RequestBody`), `SampleCreateRequest`(검증 어노테이션이 있는 요청 레코드)를 만들었다. 서비스가 없는 예시라 응답은 `SampleResponse.of(...)`와 `ApiResponse.success()`다.
+3. 임시 테스트로 `/v3/api-docs`를 내려 받아 확인하고 지웠다. 부모 클래스의 어노테이션이 문서에 반영되고(태그, 요약, 설명, 경로 변수 설명), `ApiResponse<SampleResponse>`가 `ApiResponseSampleResponse`로 풀리며, 요청 레코드의 `@NotBlank`와 `@Min`이 제약으로 나오는 것을 확인했다. `check.sh`가 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- 의존성은 `implementation`이다. 운영 코드가 어노테이션을 쓰게 되기 때문이다. 앱을 띄우면 `/v3/api-docs`가 열리는데 운영에서 열지는 정하지 않았다(인증 방식이 정해질 때 함께 정한다).
+- 확인한 문서에서 두 가지가 눈에 띄었다. (1) 응답의 필드가 필수로 표시되지 않는다. `ApiResponse`, `ErrorMessage`, `SampleResponse`에 `required`가 없어서 프런트의 생성 타입이 모두 선택(`?`)이 된다. 요청 쪽은 `@NotBlank` 필드만 필수로 나온다. (2) 응답의 콘텐츠 타입이 `*/*`이고 `operationId`가 `get`, `create`처럼 일반적인 이름이라 컨트롤러가 늘면 겹친다. 둘 다 프런트와 상의해서 정한다(필수 표시는 `@Schema(requiredMode)`, 콘텐츠 타입은 `produces`, 이름은 `@Operation(operationId)`).
+- 예시의 컨트롤러는 `src/test`에 있어서 `@ControllerSliceTest`가 `/samples` 경로도 함께 띄운다. 의존이 없어 테스트에는 영향이 없다.
+
+**관찰**:
+- ADR-0002의 "정하지 않은 것" 1번(API 문서 도구)이 springdoc으로 정해졌다. ADR-0002는 승인 전 문서라 이 스텝에서 고치지 않았다. 사용자가 ADR을 확인할 때 함께 정한다.
+
+**남은 일**:
+- `openapi.json`의 위치와 생성 방법(테스트로 생성, 낡음 확인 테스트), 프런트의 뷰어와 코드 생성 도구, 응답 필드의 필수 표시, 공통 오류 응답의 전역 설정, 운영에서 문서 엔드포인트의 공개 여부.
+- 스텝 23의 남은 일과 같다. 스텝 24의 변경을 커밋한다(사용자의 승인 후).
+
+## 스텝 25. 공통 패키지의 이름을 shared로 바꾼다
+
+**요청 (사용자)**: "support 말고 shared는 어때? 객관적으로 뭐가 나아 보여." AI가 비교하고 `shared`를 권하자 "일단 바꾸자. 그리고 규칙은 굳이."
+
+**결정 (사용자)**: 공통 패키지의 이름은 `shared`다. 이 패키지에 무엇을 두는지 한 줄의 규칙은 두지 않는다.
+
+**한 일 (AI)**:
+1. `src/main`과 `src/test`의 `com.ttadak.support`를 `git mv`로 `com.ttadak.shared`로 바꾸고 패키지 선언과 import를 고쳤다. Spring의 `org.springframework.data.jpa.domain.support`는 그대로다. 포매터가 import 순서를 다시 맞췄다. 전체 검사가 통과했다.
+2. ADR-0007(승인 문서)의 "정하지 않은 것" 1번의 패키지 이름을 바꾸고 수정의 줄을 달았다. ADR-0006의 기준 코드 경로도 바꾸고 수정의 줄을 달았다.
+3. 일지의 옛 스텝에는 `support`가 남아 있다. 일지는 쌓기만 하는 문서라 고치지 않았다.
+
+**결정 (AI)** (확인이 필요하다):
+- 비교에서 `support`는 DDD의 "supporting subdomain"과 뜻이 겹치고, `shared`는 "여러 기능이 같이 쓴다"는 뜻이 정확하다고 봐서 `shared`를 권했다. 차이가 크지 않다는 것도 함께 말했다.
+- `shared`에 기능(도메인) 규칙이 쌓일 위험은 규칙 문장 없이 코드 리뷰에 맡긴다.
+
+**관찰**:
+- 명령 하나를 일지 쓰기와 스테이징으로 묶었는데 훅이 그 명령을 통째로 막아서 일지가 쓰이지 않았다. 일지를 쓰는 명령과 스테이징, 커밋을 따로 실행한다.
+
+**남은 일**:
+- 스텝 24의 남은 일과 같다. 스텝 25의 변경을 커밋한다.

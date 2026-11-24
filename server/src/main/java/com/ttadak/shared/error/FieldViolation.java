@@ -1,4 +1,4 @@
-package com.ttadak.support.error;
+package com.ttadak.shared.error;
 
 public record FieldViolation(
     String field,

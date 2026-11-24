@@ -1,4 +1,4 @@
-package com.ttadak.support.error;
+package com.ttadak.shared.error;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

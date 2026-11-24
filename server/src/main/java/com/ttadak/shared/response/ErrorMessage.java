@@ -1,6 +1,6 @@
-package com.ttadak.support.response;
+package com.ttadak.shared.response;
 
-import com.ttadak.support.error.ErrorCode;
+import com.ttadak.shared.error.ErrorCode;
 
 /**
  * 오류 응답의 {@code error}. {@code data}에는 입력 검증 실패의 필드별 사유 목록 같은 부가 정보가 담기고, 없으면 null이다.

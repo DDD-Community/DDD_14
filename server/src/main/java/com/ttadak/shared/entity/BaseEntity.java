@@ -1,4 +1,4 @@
-package com.ttadak.support.entity;
+package com.ttadak.shared.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -76,7 +76,8 @@ public abstract class BaseEntity {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy
-            ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+            ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
                 .hashCode()
             : getClass().hashCode();
     }

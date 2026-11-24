@@ -1,6 +1,6 @@
-package com.ttadak.support.response;
+package com.ttadak.shared.response;
 
-import com.ttadak.support.error.ErrorCode;
+import com.ttadak.shared.error.ErrorCode;
 
 /**
  * 모든 API의 공통 응답. 성공이면 {@code data}에 값이 담기고 {@code error}는 null이다. 실패면 반대다. 실패 응답은 HTTP 상태도 오류 코드의 상태로 내려간다.

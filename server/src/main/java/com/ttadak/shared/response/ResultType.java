@@ -1,4 +1,4 @@
-package com.ttadak.support.response;
+package com.ttadak.shared.response;
 
 public enum ResultType {
 
