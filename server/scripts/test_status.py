@@ -44,6 +44,12 @@ class PerSlice(unittest.TestCase):
         doc(status.DOCS / "policy/UPL2.md", "승인", "#20")
         self.assertTrue(self.stage(20).startswith("2."))
 
+    def test_컨펌_전의_정책_기록은_정책_읽기다(self):
+        doc(status.DOCS / "policy/UPL2.md", "제안 (AI가 제안)", "#20")
+        stage, reasons = status.compute(status.collect(), 20)
+        self.assertTrue(stage.startswith("1."))
+        self.assertIn("컨펌", reasons[-1])
+
     def test_spec이_승인되고_plan이_없으면_계획이다(self):
         doc(status.DOCS / "policy/UPL2.md", "승인", "#20")
         doc(status.DOCS / "spec/02-thumb.md", "승인", "#20")

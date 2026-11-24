@@ -4,8 +4,8 @@
 
 ## 절차
 
-1. `git diff <base>...HEAD`를 `_workspace/diff-NN.patch`에 저장한다.
-2. `code-reviewer`를 부른다. 입력은 diff의 경로, plan의 경로, 읽을 ADR의 경로(`0003`, `0006`), 라운드 번호다. `doc-reviewer`의 리포트는 넘기지 않는다.
+1. `git diff <base>...HEAD -- . ':(exclude)docs/review'`를 `_workspace/diff-NN.patch`에 저장한다. 리뷰 문서는 뺀다. 이유: 리뷰 문서에는 `doc-reviewer`의 리포트가 있다(ADR-0001의 18번). diff로 넘기면 훅이 막는 읽기를 돌아가게 된다.
+2. `code-reviewer`를 부른다. 입력은 diff의 경로, plan의 경로, 읽을 ADR의 경로(`0003`, `0006`), 라운드 번호다. r2면 그 리뷰어의 r1 리포트(`_workspace/review-NN-code-reviewer.md`)의 경로도 넘긴다. `doc-reviewer`의 리포트는 넘기지 않는다.
 3. 리포트를 `work/references/shared/리뷰-결과-합치기.md`로 합쳐서 `docs/review/`에 기록한다.
 
 ## 점검하는 것

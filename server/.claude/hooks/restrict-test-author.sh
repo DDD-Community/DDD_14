@@ -1,5 +1,6 @@
 #!/bin/bash
-# PreToolUse(Edit|Write|MultiEdit|Bash|Read|Grep|Glob): test-author가 도는 동안의 제한.
+# PreToolUse(Edit|Write|MultiEdit|Bash|Read|Grep|Glob): 에이전트(test-author, 두 리뷰어)가 도는 동안의 제한.
+# test-author:
 #   - 쓰기는 src/test와 _workspace만.
 #   - Bash는 ./gradlew compileTestJava와 ./gradlew test만. 명령을 이어 붙이는 문자가 있으면 막는다.
 #   - src/main은 읽지 않는다(Read, 경로를 지정한 Grep과 Glob).

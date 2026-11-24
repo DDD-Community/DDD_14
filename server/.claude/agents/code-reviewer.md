@@ -33,7 +33,7 @@ tools: Read, Glob, Grep
 
 ## 입출력 프로토콜
 
-- 입력: `_workspace/diff-NN.patch`, plan의 경로, 읽을 ADR의 경로, 라운드 번호, `src/**`. 파일 내용이 아니라 경로를 받는다.
+- 입력: `_workspace/diff-NN.patch`(리뷰 문서를 뺀 diff), plan의 경로, 읽을 ADR의 경로, 라운드 번호, `src/**`. r2면 자기의 r1 리포트(`_workspace/review-NN-code-reviewer.md`). 파일 내용이 아니라 경로를 받는다.
 - 출력: 아래 형식의 리포트 전문을 **최종 응답**으로 돌려준다. 읽기 전용이라 파일을 쓰지 않는다. 기록은 호출한 쪽이 `docs/review/`에 한다.
 
 ```markdown

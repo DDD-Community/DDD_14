@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """문서와 git에서 지금 단계를 계산한다. 상태는 저장하지 않는다.
 
-출력: 브랜치, 문서의 상태, 마지막 일지의 마지막 스텝의 "남은 일", 계산한 단계와 이유.
+출력: 브랜치, 문서의 상태, 처리를 기다리는 리뷰, 안내, 마지막 일지의 마지막 스텝의 "남은 일", 계산한 단계와 이유.
 단계는 추정이다. 구현과 검증이 끝났는지는 scripts/check.sh의 결과가 있어야 안다.
 """
 import re
@@ -128,6 +128,9 @@ def compute(docs, issue=None):
         reasons.append(f"이슈 #{issue}의 문서만 본다")
         if not docs.get("policy"):
             return "1. 정책 읽기", reasons + [f"docs/policy에 `- 이슈: #{issue}`가 있는 정책 기록이 없다"]
+        unconfirmed = [str(p) for p, s in docs["policy"] if not s.startswith("승인")]
+        if unconfirmed:
+            return "1. 정책 읽기", reasons + [f"사용자의 컨펌을 기다리는 정책 기록: {', '.join(unconfirmed)}"]
         content = [(p, s) for d in ("domain", "spec") for (p, s) in docs.get(d, [])]
         if not content:
             return "2. 문서", reasons + ["정책 기록은 있고 이 이슈의 domain과 spec이 아직 없다"]
