@@ -1,0 +1,10 @@
+# 로컬 개발: H2와 ddl-auto=update
+spring:
+  datasource:
+    url: jdbc:h2:mem:ttadak
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: false

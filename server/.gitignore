@@ -1,0 +1,15 @@
+# 하네스가 만드는 임시 산출물(view의 HTML, /adr의 요약, 에이전트의 중간 결과)
+_workspace/
+
+# Gradle과 IDE 산출물
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.idea/
+*.iml
+*.log
+
+# 비밀 값
+.env
+.env.*
+!.env.example
