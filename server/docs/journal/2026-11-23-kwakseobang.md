@@ -59,3 +59,70 @@
 
 **남은 일**:
 - 스텝 1의 남은 일과 같다.
+
+## 스텝 3. 공통 코드의 시작: check.sh와 오류 응답 ADR 초안
+
+**요청 (사용자)**: "공통 ㄱㄱ" (앞서 `check.sh`를 `./gradlew check`로 바꿔도 되는지 묻고, 괜찮으면 오류 응답 ADR 초안부터 쓰겠다고 했다.)
+
+**결정 (사용자)**:
+- 오류 응답은 AuDDum의 방식을 따른다(스텝 1).
+- `check.sh`를 `./gradlew check`로 바꾸는 것은 "공통 ㄱㄱ"를 허락으로 읽었다. 틀렸으면 되돌린다.
+
+**한 일 (AI)**:
+1. `scripts/check.sh`가 `./gradlew test` 대신 `./gradlew check`를 실행하게 바꿨다(`spotlessCheck` 포함). 이 스크립트는 아직 커밋되지 않은 하네스 파일이라 이 스텝의 커밋에는 넣지 않았다. 하네스를 커밋할 때 같이 들어간다. `check.sh`를 인자와 함께 부르는 곳은 없었다(`check`는 `--tests`를 받지 못한다).
+2. 오류 응답 ADR 초안 `docs/adr/0007-오류-응답.md`를 썼다(상태: 제안). AuDDum의 `support/error`(ProblemDetail에 `code`와 `errors`, `ErrorCode` enum, 전역 예외 처리기)를 요구 20개로 옮겼다. `docs_lint`를 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- 예외 이름은 `TtadakException`, 공통 오류 코드는 `DefaultErrorCode`의 다섯 개(`MALFORMED_REQUEST`, `VALIDATION_FAILED`, `UNAUTHENTICATED`, `FORBIDDEN`, `INTERNAL_ERROR`)다. 상태와 메시지와 로그 수준은 AuDDum의 값이다.
+- 오류 코드에 로그 수준을 두는 것은 ADR-0006의 "정하지 않은 것" 3번(로그 레벨의 구분)과 겹쳐서 ADR-0007의 "정하지 않은 것"에 올렸다.
+- 도메인 오류 코드가 Spring의 `HttpStatus`를 쓰면 ADR-0003의 요구 2(도메인 계층은 다른 계층을 참조하지 않는다)와 부딪힐 수 있다. 패키지와 함께 "정하지 않은 것" 1번에 올렸고, 첫 코드를 쓸 때 정한다.
+- 인증 필터 단계의 401과 403, 성공 응답과 페이지 처리의 형식, 오류 코드 문서 생성은 이 ADR에서 정하지 않았다.
+- 메멘토의 `ApiResponse`(성공과 실패를 감싸는 형식)는 "버린 대안"에 올렸다. 사용자가 AuDDum을 따르자고 해서 버렸다.
+
+**관찰**:
+- docs-lint는 한 줄에 `반드시`와 `절대`를 섞으면 막는다. 요구를 둘로 나눠서 풀었다.
+
+**남은 일**:
+- 사용자가 ADR-0007을 확인하고 승인하면(상태의 줄을 `승인`으로) 공통 코드를 만든다: `ErrorCode`와 `DefaultErrorCode`, `TtadakException`, 전역 예외 처리기, `BaseEntity`와 `EntityStatus`, 응답 DTO 기준 코드, `@Covers`, 테스트 기반 클래스와 Fixture, 동시성 도우미, 운영 설정을 확인하는 테스트.
+
+## 스텝 4. 오류 응답 ADR-0007의 수정과 승인
+
+**요청 (사용자)**: "근데 오류 코드는 그냥 하나로 하자 메멘토처럼", 공통 접두어를 메멘토처럼 붙일지 물은 데 "응 그렇게 해봐", ADR을 보여 준 뒤 "그래".
+
+**결정 (사용자)**:
+- 오류 응답의 모양은 AuDDum(ProblemDetail)이다. 오류 코드는 메멘토처럼 enum 하나에 모은다.
+- 공통 오류 코드의 이름은 메멘토처럼 접두어(`DEFAULT_`)를 붙인다.
+- ADR-0007을 승인한다.
+- `check.sh`를 `./gradlew check`로 바꾸는 것은 스텝 3에서 "공통 ㄱㄱ"로 읽었다. 그대로 두고 사용자가 이의가 없었다.
+- 커밋은 사용자에게 확인을 받고 한다. `.claude/settings.json`의 `ask`에 `git commit`을 더했다(스텝 3 뒤).
+
+**한 일 (AI)**:
+1. 메멘토의 `ApiResponse`와 `ErrorType`, `GlobalExceptionHandler`를 읽고 AuDDum과 비교해 보였다. 클라이언트에는 기대하는 에러 형식이 아직 없었다.
+2. ADR-0007을 고쳤다: `ErrorCode` 인터페이스와 `DefaultErrorCode`와 도메인별 enum을 없애고 `ErrorCode` enum 하나로 바꿨다. 기능의 코드는 `<기능>_<사유>`로 적고 기능별로 묶는다. 요구는 21개다. "버린 대안"에 메멘토의 `ApiResponse`와 AuDDum의 도메인별 enum을 올렸다.
+3. 공통 오류 코드 다섯 개의 이름에 `DEFAULT_`를 붙였다.
+4. 원문을 브라우저로 보인 뒤 사용자의 승인을 받고 상태의 줄을 `승인`으로 바꿨다.
+
+**결정 (AI)** (확인이 필요하다):
+- 접두어만 붙이고 이름은 AuDDum의 것을 그대로 썼다(`DEFAULT_MALFORMED_REQUEST`, `DEFAULT_VALIDATION_FAILED`, `DEFAULT_UNAUTHENTICATED`, `DEFAULT_FORBIDDEN`, `DEFAULT_INTERNAL_ERROR`). 메멘토의 `DEFAULT_BAD_REQUEST`는 우리의 `MALFORMED_REQUEST`와 `VALIDATION_FAILED` 두 개로 나뉘어서 이름까지 맞추지 않았다.
+- "응 그렇게 해봐"는 접두어를 붙이라는 뜻으로 읽었다. ADR의 승인은 따로 "그래"를 받았다.
+
+**관찰**:
+- 사용자가 승인 전에 문서를 커밋하는 것을 막고 싶어 했다. 훅을 더하는 대신 `git commit`을 `ask`로 옮겼다. 이 방식은 확인창에 커밋 명령만 보이므로 제가 먼저 무엇을 커밋하는지 말해야 한다.
+- 승인해야 하는 문서는 쓴 직후에 원문을 열어 보이고, 승인을 받은 뒤에 커밋한다. 이번에는 스텝 3에서 이 순서를 어겼다.
+
+**남은 일**:
+- 공통 코드를 만든다: `ErrorCode`, `TtadakException`, 전역 예외 처리기, `BaseEntity`와 `EntityStatus`, `TimeConfig`와 `JpaAuditingConfig`, 서비스 스테레오타입, 응답 DTO 기준 코드, `@Covers`, 테스트 기반 클래스와 Fixture, 동시성 도우미, 운영 설정 테스트(AuDDum의 `support` 기준).
+
+## 스텝 5. 주석 포맷 켜기
+
+**요청 (사용자)**: "주석 포맷팅도 맞춰라."
+
+**한 일 (AI)**:
+1. `config/spotless/eclipse-formatter.xml`에서 javadoc, 블록, 줄 주석의 포맷을 켰다(스텝 1에서는 꺼 두었다). 한 줄 길이는 130자다.
+2. 임시 샘플로 확인한 뒤 샘플을 지웠다. 여러 칸 공백이 한 칸이 되고, `//` 뒤 공백이 정리된다. 줄바꿈과 문장은 그대로 둔다.
+
+**결정 (AI)** (확인이 필요하다):
+- "주석 포맷팅을 맞춘다"를 Spotless의 주석 포맷을 켜는 것으로 읽었다. 주석의 문장을 합치는 것(줄 합치기)은 켜지 않았다. 다른 뜻(예: 주석의 형식 규칙)이었으면 알려 달라.
+
+**남은 일**:
+- 스텝 4의 남은 일과 같다.
