@@ -73,5 +73,54 @@ class PlanCoverage(unittest.TestCase):
         self.assertEqual(trace_check.plan_problems(), [])
 
 
+POLICY = """# 정책 기록 UPL
+
+- 상태: 승인
+
+| 번호 | 위키 상태 | 문장 | 이 슬라이스 |
+|---|---|---|---|
+| UPL-01 | 확정 | a | 예 |
+
+## 기획 질문
+
+| # | 질문 | 정책 | 상태 |
+|---|---|---|---|
+| 3 | 단위는 | UPL-01 | 열림 |
+| 8 | 어느 이유를 | UPL-01 | 닫힘 (일지 스텝 9: 형식) |
+"""
+
+
+class Basis(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        trace_check.ROOT = Path(self.tmp.name)
+        p = trace_check.ROOT / "docs" / "policy" / "UPL.md"
+        p.parent.mkdir(parents=True)
+        p.write_text(POLICY, encoding="utf-8")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def basis(self, cell):
+        p = trace_check.ROOT / "docs" / "spec" / "01-a.md"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("| ID | 수준 | 기준 | 근거 |\n|---|---|---|---|\n"
+                     f"| AC-1.1 | MUST | a(질문 3) | {cell} |\n", encoding="utf-8")
+        return trace_check.basis_problems()
+
+    def test_정책_번호와_기술_결정과_닫힌_질문은_근거다(self):
+        for cell in ("UPL-01", "기술 결정", "UPL-Q8"):
+            self.assertEqual(self.basis(cell), [], cell)
+
+    def test_열린_질문은_근거가_아니다(self):
+        self.assertIn("닫히지 않은", self.basis("UPL-Q3")[0])
+
+    def test_없는_질문을_알린다(self):
+        self.assertIn("없는 기획 질문", self.basis("UPL-Q9")[0])
+
+    def test_근거가_없으면_알린다(self):
+        self.assertIn("근거가 없는 AC", self.basis("")[0])
+
+
 if __name__ == "__main__":
     unittest.main()

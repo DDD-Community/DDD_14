@@ -79,7 +79,7 @@ tools: Read, Glob, Grep
 - 상류: `review` 스킬이 절차와 경로를 정해 부른다. `work`의 문서와 계획 단계(docs), 종료 단계(conformance)가 `review` 스킬을 거쳐 부른다.
 - 하류: 호출한 쪽(메인 세션)이 `work/references/shared/리뷰-결과-합치기.md`로 합치고 `docs/review/`에 기록한다.
 - 병렬: `code-reviewer`(코드 변경만). 서로의 리포트를 보지 않는다.
-- 재호출: 지적을 반영한 뒤 r2로 한 번 더 부른다. 라운드의 상한(r2)과 그 뒤의 분기는 호출한 쪽이 지킨다(`work/references/shared/리뷰-결과-합치기.md`).
+- 재호출: r1에 차단이 있으면 반영한 뒤 r2로 한 번 더 부른다. r1의 차단이 0건이면 r2는 없다. 라운드의 상한(r2)과 그 뒤의 분기는 호출한 쪽이 지킨다(`work/references/shared/리뷰-결과-합치기.md`).
 
 ## 품질 자체 검증
 

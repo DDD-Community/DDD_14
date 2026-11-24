@@ -4,6 +4,7 @@
 #   - force 계열(-f, --force, --force-with-lease, --force-if-includes, +refspec)과 --all, --mirror를 막는다.
 #   - 현재 커밋을 scripts/check.sh로 검증했는지 확인한다. check.sh가 통과하면 커밋 해시를 기록하고, 기록이 현재 커밋과 다르면 막는다.
 # 한계: 별칭, 변수, 셸 함수로 감싼 push와 사람이 터미널에서 직접 하는 push는 보지 못한다(CI와 브랜치 보호의 몫).
+#   heredoc 본문 안의 push(예: bash <<EOF로 넘기는 스크립트)도 보지 못한다.
 # develop은 브랜치 전략이 정해지기 전의 가정이다.
 input=$(cat)
 tool=$(jq -r '.tool_name // empty' <<<"$input" 2>/dev/null)
@@ -11,13 +12,25 @@ tool=$(jq -r '.tool_name // empty' <<<"$input" 2>/dev/null)
 cmd=$(jq -r '.tool_input.command // empty' <<<"$input" 2>/dev/null)
 cwd=$(jq -r '.cwd // empty' <<<"$input" 2>/dev/null)
 proj=${CLAUDE_PROJECT_DIR:-${cwd:-.}}
-grep -Eq '(^|[;&|[:space:]])git push( |$)' <<<"$cmd" || exit 0
+# heredoc의 본문은 명령이 아니라 글이다(파일에 쓰는 내용, 커밋 메시지). 본문의 줄을 빼고 본다. <<<는 heredoc이 아니다.
+code=$(awk -v q="'" '
+  BEGIN { re = "(^|[^<])<<-?[ \t]*[\"" q "]?[A-Za-z_][A-Za-z0-9_]*[\"" q "]?" }
+  skip { t = $0; if (tabs) sub(/^\t+/, "", t); if (t == delim) skip = 0; next }
+  {
+    print
+    if (match($0, re)) {
+      h = substr($0, RSTART, RLENGTH); sub(/^[^<]?<</, "", h)
+      tabs = (h ~ /^-/); sub(/^-/, "", h); gsub(/[ \t"]/, "", h); gsub(q, "", h)
+      delim = h; skip = 1
+    }
+  }' <<<"$cmd")
+grep -Eq '(^|[;&|[:space:]])git push( |$)' <<<"$code" || exit 0
 
 protected="main develop"
 is_protected() { local b=${1#refs/heads/}; [[ " $protected " == *" $b "* ]]; }
 block() { echo "차단: $1 실행하려던 명령: $cmd" >&2; exit 2; }
 
-seg=$(grep -E '(^|[;&|[:space:]])git push( |$)' <<<"$cmd" | head -1 | sed -E 's/.*(^|[;&|[:space:]])git push( |$)//')
+seg=$(grep -E '(^|[;&|[:space:]])git push( |$)' <<<"$code" | head -1 | sed -E 's/.*(^|[;&|[:space:]])git push( |$)//')
 seg=${seg%%[;&|]*}
 read -ra words <<<"$(tr -d "\"'" <<<"$seg")"
 current=$(git -C "$proj" branch --show-current 2>/dev/null)

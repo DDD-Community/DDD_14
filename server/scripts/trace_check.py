@@ -6,6 +6,8 @@
 - ID에 테스트가 없으면 실패한다. 테스트가 없는 ID를 가리켜도 실패한다.
 - 근거: spec의 AC 행은 근거의 정책 번호(예: UPL-03)를 가진다. 정책이 아닌 기술 결정이면 행에 "기술 결정"을 쓴다.
   정책 번호는 docs/policy의 기록에 있어야 하고 위키 상태가 확정이어야 한다(검토 중과 미결정은 구현하지 않는다).
+  PM이 답했지만 위키에 아직 정책 번호가 없으면 기획 질문(예: UPL-Q8)을 쓴다. 그 질문은 docs/policy/UPL.md의
+  기획 질문 표에 있어야 하고 상태가 닫힘이어야 한다.
 - plan: 작업마다 다루는 ID가 있고, 그 ID가 spec이나 domain에 있다. plan이 다루는 spec과 domain의
   살아 있는 AC와 R은 모두 어떤 plan의 작업에 있다.
 
@@ -19,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ID = re.compile(r"^(?:AC|R)-\d+\.\d+$")
 ID_IN_TEXT = re.compile(r"\b(?:AC|R)-\d+\.\d+\b")
 POLICY_ID = re.compile(r"\b[A-Z]{2,5}-\d{2,3}\b")
+QUESTION_ID = re.compile(r"\b([A-Z]{2,5})-Q(\d+)\b")
 TECH_BASIS = "기술 결정"
 
 
@@ -85,9 +88,27 @@ def policy_status():
     return out
 
 
+def policy_questions():
+    """docs/policy의 기획 질문 표에서 {(기능ID, 번호): 상태}를 모은다."""
+    out = {}
+    for f in sorted((ROOT / "docs" / "policy").glob("*.md")):
+        col = None
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if not line.startswith("|"):
+                col = None
+                continue
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if cells[0] == "#" and "상태" in cells:
+                col = cells.index("상태")
+                continue
+            if col is not None and cells[0].isdigit() and len(cells) > col:
+                out[(f.stem, cells[0])] = cells[col]
+    return out
+
+
 def basis_problems():
     """spec의 AC가 확정된 정책을 근거로 가지는지 검사한다."""
-    known = policy_status()
+    known, questions = policy_status(), policy_questions()
     problems = []
     for f in sorted((ROOT / "docs" / "spec").glob("*.md")):
         for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
@@ -98,8 +119,15 @@ def basis_problems():
                 continue
             where = f"{f.relative_to(ROOT)}:{n}"
             cited = POLICY_ID.findall(" ".join(cells[1:]))
-            if not cited and TECH_BASIS not in line:
-                problems.append(f"근거가 없는 AC: {cells[0]} ({where}). 정책 번호나 \"{TECH_BASIS}\"를 쓴다")
+            asked = QUESTION_ID.findall(" ".join(cells[1:]))
+            if not cited and not asked and TECH_BASIS not in line:
+                problems.append(f"근거가 없는 AC: {cells[0]} ({where}). 정책 번호, 닫힌 기획 질문(UPL-Q8), \"{TECH_BASIS}\" 중 하나를 쓴다")
+            for feature, num in asked:
+                st = questions.get((feature, num))
+                if st is None:
+                    problems.append(f"정책 기록에 없는 기획 질문: {cells[0]}의 {feature}-Q{num} ({where})")
+                elif not st.startswith("닫힘"):
+                    problems.append(f"닫히지 않은 기획 질문을 근거로 쓴다: {cells[0]}의 {feature}-Q{num}는 {st} ({where})")
             for pid in cited:
                 st = known.get(pid)
                 if st is None:
