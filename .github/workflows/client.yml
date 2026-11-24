@@ -1,0 +1,45 @@
+name: client
+
+on:
+  pull_request:
+    paths:
+      - 'client/**'
+      - '.github/workflows/client.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'client/**'
+      - '.github/workflows/client.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: client/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+        env:
+          LEFTHOOK: '0' # CI에서는 git hook을 쓰지 않는다
+
+      - name: Verify (typecheck → lint → format → test → build)
+        run: pnpm verify
+
+      - name: Docs check
+        run: pnpm docs:check
