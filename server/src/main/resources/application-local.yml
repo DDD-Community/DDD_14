@@ -1,8 +1,9 @@
-# 로컬 개발: H2와 ddl-auto=update
+# 로컬 개발: docker compose의 PostgreSQL(compose.yaml)과 ddl-auto=update
 spring:
   datasource:
-    url: jdbc:h2:mem:ttadak
-    driver-class-name: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/ttadak
+    username: ttadak
+    password: ttadak
   jpa:
     hibernate:
       ddl-auto: update

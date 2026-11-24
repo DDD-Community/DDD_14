@@ -1,5 +1,4 @@
 # 운영(CI와 같은 설정): Flyway가 스키마를 만들고 JPA는 검증만 한다.
-# 운영 DB의 드라이버는 4차 회의(11/24)에서 DB를 정한 뒤 의존성과 함께 더한다.
 spring:
   datasource:
     url: ${DB_URL}

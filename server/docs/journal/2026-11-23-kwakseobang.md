@@ -582,3 +582,74 @@
 
 **남은 일**:
 - 스텝 24의 남은 일과 같다. 스텝 25의 변경을 커밋한다.
+
+## 스텝 26. 운영 DB를 PostgreSQL로 맞춘다
+
+**요청 (사용자)**: "아 그리고 PostgreSQL로 하기로 함" (4차 회의의 결과다.)
+
+**결정 (사용자)**: 운영 DB는 PostgreSQL이다.
+
+**한 일 (AI)**:
+1. `build.gradle.kts`에 PostgreSQL 드라이버(`org.postgresql:postgresql`), Flyway의 PostgreSQL 모듈(`org.flywaydb:flyway-database-postgresql`), Testcontainers의 PostgreSQL 모듈(`org.testcontainers:testcontainers-postgresql`)을 더하고 "4차 회의 뒤에 더한다"는 주석을 지웠다. 버전은 Spring Boot가 관리하고(Flyway 12.4.0, 드라이버 42.7.14, Testcontainers 2.0.5), 의존성이 해결되는 것을 확인했다.
+2. 로컬과 테스트의 H2를 PostgreSQL 호환 모드(`MODE=PostgreSQL`)로 바꿨다. 로컬과 운영의 SQL 차이를 조금 줄이려는 것이다. 모드가 실제로 적용되는 것을 확인했다(`INFORMATION_SCHEMA`의 `MODE`).
+3. `application-prod.yml`의 "DB를 정한 뒤 더한다"는 주석을 지웠다. 접속 정보는 이미 환경 변수(`DB_URL` 등)다.
+4. ADR-0002의 MySQL 가정(요구 5, 용어 표, 서두, "결과", "정하지 않은 것" 4번)을 PostgreSQL로 고치고 수정의 줄을 달았다. "정하지 않은 것" 4번은 PostgreSQL의 버전과 커넥션 설정으로 바꿨다. `docs_lint.py`가 통과했다. 전체 테스트와 `check.sh`가 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- 로컬과 테스트의 H2는 그대로 쓴다(ADR-0002의 요구 14). `MODE=PostgreSQL`은 완전한 호환이 아니다. SQL과 잠금의 차이는 CI에서만 잡힌다.
+- Testcontainers(PostgreSQL) 의존성만 더했고 `@IntegrationTest`에는 아직 연결하지 않았다. 이 환경에서는 Docker가 응답하지 않아서 동작을 확인할 수 없었다. 연결 방식(항상 컨테이너로 할지, CI에서만 할지)은 사용자가 정한다.
+- DB 비우기(ADR-0004 E5)도 아직 만들지 않았다. 엔티티가 없어 쓰임이 없다.
+
+**관찰**:
+- H2의 `getURL()`은 `MODE` 같은 옵션을 떼고 돌려줘서 처음 쓴 확인 방법이 틀렸다. 설정은 `INFORMATION_SCHEMA`로 확인해야 한다.
+
+**남은 일**:
+- Testcontainers PostgreSQL을 `@IntegrationTest`와 `@E2ETest`에 연결하는 방식을 정한다. CI 워크플로(Docker가 있는 환경에서 Postgres 컨테이너, `validate`, 마이그레이션 검증).
+- 마이그레이션 파일의 위치와 이름 규칙(Flyway), PostgreSQL 버전.
+- 스텝 25의 남은 일과 같다. 스텝 26의 변경을 커밋한다(사용자의 승인 후).
+
+## 스텝 27. 로컬 개발 DB는 compose의 PostgreSQL, 테스트는 H2, Flyway는 나중에
+
+**요청 (사용자)**: "그리고 Docker compose로 로컬 DB는 가져갈 거고 test는 H2로 할 듯, 그리고 flyway는 운영 환경 들어가면 시작할 듯."
+
+**결정 (사용자)**: 로컬 개발은 docker compose의 PostgreSQL을 쓴다. 테스트는 H2를 쓴다(확정은 아니고 "할 듯"). Flyway는 운영 환경에 들어갈 때부터 쓴다.
+
+**한 일 (AI)**:
+1. `compose.yaml`(`server/`)을 만들었다. `postgres:17` 한 서비스, 데이터베이스, 사용자, 비밀번호는 모두 `ttadak`(로컬 전용), 포트 5432, 이름 있는 볼륨, `pg_isready` 상태 확인이다.
+2. `application-local.yml`을 H2에서 `jdbc:postgresql://localhost:5432/ttadak`로 바꿨다. `ddl-auto: update`, Flyway 꺼짐, SQL 로그는 그대로다. 테스트 프로파일(`application-test.yml`)은 H2(`MODE=PostgreSQL`)다.
+3. 스텝 26에서 더한 `testcontainers-postgresql` 의존성을 뺐다. 테스트가 H2라서 쓸 곳이 없다. 전체 테스트와 `check.sh`가 통과했다.
+4. ADR-0002를 고쳤다. 요구 14와 서두, 용어, 버린 대안을 바꿨다. 요구 6, 7, 15는 덮어쓰지 않고 "정하지 않은 것" 8번(Flyway 시작 시점)과 9번(CI 통합 테스트의 DB)으로 올렸다. `docs_lint.py`가 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- PostgreSQL 버전을 `17`로 임시로 정했다. 결정이 없는 값이라 "정하지 않은 것" 4번에 적었다.
+- 로컬 DB의 접속 정보(`ttadak` 사용자와 비밀번호)는 로컬 전용 값이라 설정 파일에 그대로 적었다. 운영은 환경 변수를 쓴다.
+- Docker가 응답하지 않아 `docker compose up`과 로컬 프로파일의 기동은 확인하지 못했다. 설정 파일의 구문과 H2 테스트 쪽 동작만 확인했다.
+- 앱의 Flyway 의존성(`spring-boot-starter-flyway`, `flyway-database-postgresql`)은 그대로 뒀다. 운영 프로파일에서 켜져 있고, 마이그레이션 파일이 없으면 운영 프로파일의 기동은 실패한다(운영 환경 전에는 쓰지 않는다).
+- `spring-boot-testcontainers`와 `testcontainers-junit-jupiter`는 처음 셋팅 때 넣은 것인데 지금은 쓰는 곳이 없다. 삭제는 사용자가 정하게 남겼다.
+
+**관찰**:
+- CI와 로컬 테스트가 모두 H2이면 H2와 PostgreSQL의 차이(SQL 문법, 잠금)가 운영에서야 드러난다. 잠금과 동시성의 테스트는 H2로 믿을 수 없다(ADR-0002의 "결과"). 시간이 지나면 CI에서만 Testcontainers를 쓰는 안을 다시 볼 수 있다.
+
+**남은 일**:
+- CI 워크플로(사용자의 허락 후), "정하지 않은 것" 8번과 9번.
+- 스텝 26의 남은 일 중 Testcontainers 연결은 이 스텝의 결정으로 접힌다.
+- 스텝 26과 27의 변경을 커밋한다(사용자의 승인 후).
+
+## 스텝 28. 쓰지 않는 Testcontainers 의존성을 지운다
+
+**요청 (사용자)**: "지워라 일단."
+
+**결정 (사용자)**: 쓰지 않는 Testcontainers 의존성은 지운다.
+
+**한 일 (AI)**:
+1. `spring-boot-testcontainers`와 `testcontainers-junit-jupiter`를 `build.gradle.kts`에서 지웠다. 소스와 설정에서 쓰는 곳이 없는 것을 확인했고 전체 검사가 통과했다.
+
+**결정 (AI)** (확인이 필요하다):
+- ADR-0002의 요구 15와 "정하지 않은 것" 9번은 Testcontainers를 그대로 언급한다. CI의 테스트 DB를 정할 때(CI를 만들 때) 고친다. CI에서 Testcontainers를 쓰기로 하면 그때 의존성을 다시 더한다.
+
+**관찰**:
+- `archunit-junit5`도 지금은 쓰는 곳이 없다(엔티티 규칙 검사를 두지 않기로 했다). 지울지는 사용자가 정한다.
+
+**남은 일**:
+- CI 워크플로(사용자의 허락 후), "정하지 않은 것" 8번과 9번.
+- 스텝 28의 변경을 커밋한다(사용자의 승인 후).
