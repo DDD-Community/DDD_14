@@ -62,5 +62,31 @@ class PerSlice(unittest.TestCase):
         self.assertTrue(lines[0].startswith("단계(추정): 1."))
 
 
+
+class Reviews(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        status.ROOT, status.DOCS = root, root / "docs"
+        (status.DOCS / "review").mkdir(parents=True)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def write(self, text):
+        (status.DOCS / "review/01-upload.md").write_text(text, encoding="utf-8")
+
+    def test_처리가_없는_리뷰의_절을_알린다(self):
+        self.write("# 리뷰 01\n\n## 문서 r1\n\n### 지적\n\n### 처리 (x)\n\n## 문서 r2\n\n### 지적\n")
+        self.assertEqual(status.unprocessed_reviews(), ["docs/review/01-upload.md (문서 r2)"])
+
+    def test_보류가_남은_절을_알린다(self):
+        self.write("# 리뷰 01\n\n## 코드 r1\n\n### 처리 (x)\n\n| CODE-1 | 보류 | 기다린다 | 사용자 |\n")
+        self.assertEqual(status.unprocessed_reviews(), ["docs/review/01-upload.md (코드 r1, 보류가 남았다)"])
+
+    def test_모든_절에_처리가_있으면_없다(self):
+        self.write("# 리뷰 01\n\n## 문서 r1\n\n### 처리 (x)\n\n## plan r1\n\n### 처리 (y)\n")
+        self.assertEqual(status.unprocessed_reviews(), [])
+
 if __name__ == "__main__":
     unittest.main()

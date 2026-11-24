@@ -12,8 +12,9 @@
       "Bash(./scripts/start-slice.sh:*)",
       "Bash(python3 scripts/docs_lint.py:*)",
       "Bash(python3 scripts/trace_check.py:*)",
-      "Bash(python3 scripts/view.py:*)",
       "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
       "Bash(git merge-base:*)",
@@ -29,7 +30,6 @@
       "Bash(gh api repos/*/contents/*:*)"
     ],
     "ask": [
-      "Bash(git commit:*)",
       "Bash(gh pr create:*)",
       "Bash(gh pr comment:*)",
       "Bash(gh issue create:*)",

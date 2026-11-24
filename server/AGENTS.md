@@ -25,6 +25,6 @@
 
 ## 어디에 무엇이 있나
 
-- AI는 슬라이스를 진행할 때 `work` 스킬(`.claude/skills/work/SKILL.md`)을 **반드시** 따라야 한다. 지금 단계는 `python3 scripts/status.py`로 계산한다. 새 슬라이스는 `/next`, 위키의 정책에서 이슈를 만드는 일은 `/issues <기능ID>`다. ADR을 읽기 좋게 요약해서 보는 일은 `/adr <번호나 주제>`다.
+- AI는 슬라이스를 진행할 때 `work` 스킬(`.claude/skills/work/SKILL.md`)을 **반드시** 따라야 한다. 지금 단계는 `python3 scripts/status.py`로 계산한다. 새 슬라이스는 `/next`, 위키의 정책에서 이슈를 만드는 일은 `/issues <기능ID>`다.
 - 하네스의 결정과 구성은 `docs/adr/0001-하네스.md`에 있다. 병합, 보호 브랜치의 push, 비밀 파일은 권한과 훅이 막는다(`.claude/settings.json`, `.claude/hooks/`).
 - 코드와 빌드 명령은 아직 없다. ADR은 모두 초안이고 승인 전이다. 정해지지 않은 것은 각 ADR의 "정하지 않은 것"에 있다.

@@ -4,10 +4,9 @@
 
 ## 절차
 
-1. 같은 run-id에 현재 `HEAD`와 맞는 `00_diff.patch`가 있으면 그대로 쓴다. 없으면 첫 줄에 `# commit: <HEAD 해시>`를 적고 `git diff <base>...HEAD`를 `_workspace/<run-id>/00_diff.patch`에 저장한다.
-2. `code-reviewer`를 부른다. 입력은 diff의 경로, plan의 경로, 읽을 ADR의 경로(`0003`, `0006`)다. `doc-reviewer`의 리포트는 넘기지 않는다.
-3. 응답을 받자마자 고치지 않고 `_workspace/<run-id>/10_code-reviewer_report.md`에 저장한다. 이미 있으면 다시 부르지 않는다.
-4. 저장한 리포트를 `work/references/shared/리뷰-결과-합치기.md`로 합쳐서 `docs/review/`에 기록한다.
+1. `git diff <base>...HEAD`를 `_workspace/diff-NN.patch`에 저장한다.
+2. `code-reviewer`를 부른다. 입력은 diff의 경로, plan의 경로, 읽을 ADR의 경로(`0003`, `0006`), 라운드 번호다. `doc-reviewer`의 리포트는 넘기지 않는다.
+3. 리포트를 `work/references/shared/리뷰-결과-합치기.md`로 합쳐서 `docs/review/`에 기록한다.
 
 ## 점검하는 것
 

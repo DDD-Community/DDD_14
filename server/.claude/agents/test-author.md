@@ -30,7 +30,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 
 - 입력: plan의 경로와 작업 번호, 그 작업의 AC·R이 있는 파일의 경로(spec, domain), `docs/adr/0004-테스트-전략.md`의 경로, `src/test/**`. 재호출이면 이전 노트와 지적한 내용. 읽을 문서는 이것뿐이다.
 - 쓰기 범위: `src/test/**`와 `_workspace/**`. `.claude/hooks/restrict-test-author.sh`가 이 범위 밖의 쓰기와 `src/main` 읽기를 막는다. 훅이 없어도 지킨다.
-- 출력: `_workspace/<run-id>/20_test-author_note.md`.
+- 출력: `_workspace/test-author-NN-<작업 번호>.md`.
 
 ```markdown
 # test-author note

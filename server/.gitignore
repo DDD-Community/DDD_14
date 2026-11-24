@@ -1,4 +1,4 @@
-# 하네스가 만드는 임시 산출물(view의 HTML, /adr의 요약, 에이전트의 중간 결과)
+# 하네스가 만드는 임시 산출물(에이전트에게 넘기는 diff, test-author의 노트, PR 설명의 초안)
 _workspace/
 
 # Gradle과 IDE 산출물

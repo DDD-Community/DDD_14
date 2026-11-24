@@ -10,8 +10,8 @@
 ## 절차
 
 1. `./scripts/check.sh`를 실행한다. 이유: 도구가 최종 판정이다. 빌드와 테스트, `docs-lint`, ID 추적(`trace_check.py`)이 한 번에 돈다. 실패하면 2로 가지 않고 `implement`로 돌아간다.
-2. 같은 run-id에 현재 `HEAD`와 맞는 `00_diff.patch`가 있으면 그대로 쓴다. 없으면 첫 줄에 `# commit: <HEAD 해시>`를 적고 `git diff`를 `_workspace/<run-id>/00_diff.patch`에 저장한다.
-3. `10_code-reviewer_report.md`가 이미 있으면 부르지 않고 읽는다. 없으면 `code-reviewer`를 부르고, 응답을 받자마자 고치지 않고 `_workspace/<run-id>/10_code-reviewer_report.md`에 저장한다. `review` 스킬의 code 절차를 따른다. 이유: 끊겨도 리뷰를 다시 돌리지 않으려는 것이다(ADR-0001의 21~22번). 입력은 diff 경로와 plan 경로뿐이다. 이유: 성능, 코드 품질, 보안의 판단은 코드를 쓴 세션이 못 본다. conformance(정책과 코드의 대조)는 `close`에서 한 번 한다.
+2. `git diff <base>...HEAD`를 `_workspace/diff-NN.patch`에 저장한다.
+3. `code-reviewer`를 부른다. `review` 스킬의 code 절차를 따른다. 입력은 diff 경로와 plan 경로뿐이다. 이유: 성능, 코드 품질, 보안의 판단은 코드를 쓴 세션이 못 본다. conformance(정책과 코드의 대조)는 `close`에서 한 번 한다.
 4. 리포트를 `shared/리뷰-결과-합치기.md`로 합치고 `docs/review/`에 기록한다. 리포트 전문을 사용자에게 보인다.
 5. 판정으로 분기한다.
 

@@ -35,7 +35,7 @@ tools: Read, Glob, Grep
 ## 입출력 프로토콜
 
 - 입력(docs): 점검할 문서의 경로, `docs/README.md`, `.claude/skills/work/references/doc-style.md`, 정책 기록(`docs/policy/`)과 사용자의 결정이 있는 해당 일지의 경로, 관련 domain·spec·ADR의 경로. 파일 내용이 아니라 경로를 받는다.
-- 입력(conformance): plan의 경로, `_workspace/<run-id>/00_diff.patch`, plan이 가리키는 spec·domain·ADR의 경로, `src/test/**`.
+- 입력(conformance): plan의 경로, `_workspace/diff-NN.patch`, plan이 가리키는 spec·domain·ADR의 경로, `src/test/**`.
 - 출력: 아래 형식의 리포트 전문을 **최종 응답**으로 돌려준다. 읽기 전용이라 파일을 쓰지 않는다. 저장은 호출한 쪽이 `docs/review/`에 한다(`work/references/shared/리뷰-결과-합치기.md`).
 
 ```markdown

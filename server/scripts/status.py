@@ -71,38 +71,17 @@ def last_journal_remaining():
 
 
 def unprocessed_reviews():
+    """슬라이스의 리뷰 문서에서 "### 처리"가 없는 리뷰의 절과, 보류가 남은 절을 찾는다. 리뷰 한 번이 `## ` 절 하나다."""
     out = []
     for f in sorted((DOCS / "review").glob("*.md")):
-        text = f.read_text(encoding="utf-8")
-        if "## 처리" not in text:
-            out.append(str(f.relative_to(ROOT)))
-            continue
-        if re.search(r"\|\s*보류\s*\|", text) and "처리의 변경" not in text:
-            out.append(str(f.relative_to(ROOT)) + " (보류가 남았다)")
+        rel = f.relative_to(ROOT)
+        for sec in re.split(r"(?m)^## ", f.read_text(encoding="utf-8"))[1:]:
+            name = sec.splitlines()[0].strip()
+            if "### 처리" not in sec:
+                out.append(f"{rel} ({name})")
+            elif re.search(r"\|\s*보류\s*\|", sec) and "처리의 변경" not in sec:
+                out.append(f"{rel} ({name}, 보류가 남았다)")
     return out
-
-
-def workspace_issues():
-    """_workspace/의 중간 산출물에서 옮기지 않은 리포트와 낡은 diff를 찾는다."""
-    ws = ROOT / "_workspace"
-    if not ws.is_dir():
-        return [], []
-    reviews = "\n".join(f.read_text(encoding="utf-8") for f in (DOCS / "review").glob("*.md"))
-    head = git("rev-parse", "HEAD")
-    unmoved, stale = [], []
-    for run in sorted(p for p in ws.iterdir() if p.is_dir()):
-        for rep in sorted(run.glob("10_*_report.md")):
-            if f"{run.name}/{rep.name}" not in reviews:
-                unmoved.append(str(rep.relative_to(ROOT)))
-        diff = run / "00_diff.patch"
-        if diff.exists() and head:
-            first = diff.read_text(encoding="utf-8").splitlines()[:1]
-            m = re.match(r"#\s*commit:\s*(\S+)", first[0]) if first else None
-            if not m:
-                stale.append(f"{diff.relative_to(ROOT)} (첫 줄에 커밋 해시가 없다)")
-            elif not head.startswith(m.group(1)) and not m.group(1).startswith(head):
-                stale.append(f"{diff.relative_to(ROOT)} (HEAD와 다르다)")
-    return unmoved, stale
 
 
 def open_questions():
@@ -216,15 +195,6 @@ def main():
     if pending_reviews:
         print("\n처리 대기 리뷰(지적의 처리가 없다):")
         for r in pending_reviews:
-            print(f"  - {r}")
-    unmoved, stale = workspace_issues()
-    if unmoved:
-        print("\ndocs/review/에 아직 옮기지 않은 리포트(_workspace):")
-        for r in unmoved:
-            print(f"  - {r}")
-    if stale:
-        print("\n낡은 diff(_workspace):")
-        for r in stale:
             print(f"  - {r}")
     if docs.get("policy"):
         print("\n정책 기록이 있다. 위키가 바뀌었는지: python3 scripts/policy_check.py")
