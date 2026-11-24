@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# 슬라이스를 검증한다(ADR-0001의 6단계). 하나라도 실패하면 0이 아닌 값으로 끝난다.
+# 슬라이스를 검증한다. 하나라도 실패하면 0이 아닌 값으로 끝난다.
 #   1. docs-lint: 문서 규칙
 #   2. trace: spec의 AC와 domain의 R이 테스트에 닿는지
-#   3. 빌드와 테스트: ./gradlew check (Spotless 형식 검사와 ArchUnit 포함한 테스트). 빌드 파일이 아직 없으면 건너뛰고 표시한다.
+#   3. scripts의 단위 테스트
+#   4. 빌드와 테스트: ./gradlew check (Spotless 형식 검사와 ArchUnit 포함한 테스트). 빌드 파일이 아직 없으면 건너뛰고 표시한다.
 # 통과하면 현재 커밋 해시를 기록한다. push 전에 그 기록을 확인할 수 있다.
 set -uo pipefail
 # 모노레포에서 server/가 프로젝트 폴더다. git 저장소의 맨 위가 아니라 이 스크립트의 위 폴더로 간다.

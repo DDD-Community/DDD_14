@@ -1,10 +1,11 @@
 #!/bin/bash
-# PreToolUse(Edit|Write|MultiEdit): 편집 가드(ADR-0001의 4번과 훅 표).
+# PreToolUse(Edit|Write|MultiEdit): 편집 가드.
 #   - src/main을 고치는데 승인된 plan이 없으면 막지 않고 알린다(통과). 이유: 슬라이스 밖의 수정(병합 뒤의 수정)은 승인할 plan이 없다.
 #     슬라이스 안에서 plan 없이 구현하는 것은 work 스킬의 plan 단계가 1차로 막는다. 브랜치 전략이 정해지면 fix 브랜치만 예외로 두는 쪽으로 올린다.
 #   - docs/spec은 승인된 plan이 있는 동안(구현 중) 승인된 spec을 고치지 않는다. 이유: 코드에 맞춰 spec을 고치면 문서가 기준이 아니게 된다.
 #   - .env 파일은 쓰지 않는다.
 # 막는 경우가 아니면 통과시킨다. 입력을 읽지 못해도 통과시킨다(작업을 멈추는 쪽의 오류가 더 크다).
+# 한계: Edit, Write, MultiEdit만 본다. Bash로 쓰는 것(sed -i, cat >)과 plan 상태 줄을 AI가 고치는 것은 막지 못한다.
 input=$(cat)
 file=$(jq -r '.tool_input.file_path // empty' <<<"$input" 2>/dev/null)
 cwd=$(jq -r '.cwd // empty' <<<"$input" 2>/dev/null)

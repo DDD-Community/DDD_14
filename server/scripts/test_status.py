@@ -52,6 +52,15 @@ class PerSlice(unittest.TestCase):
     def test_이슈를_모르면_모든_문서를_본다(self):
         self.assertTrue(self.stage(None).startswith("3."))
 
+    def test_이슈_번호가_없는_브랜치는_슬라이스_밖이라고_알린다(self):
+        lines = status.stage_report("setting/server-harness", status.collect())
+        self.assertTrue(lines[0].startswith("단계: 슬라이스 밖"))
+        self.assertIn("3.", lines[2])
+
+    def test_이슈_번호가_있는_브랜치는_그_이슈의_단계를_보인다(self):
+        lines = status.stage_report("feat/20-new-feature", status.collect())
+        self.assertTrue(lines[0].startswith("단계(추정): 1."))
+
 
 if __name__ == "__main__":
     unittest.main()

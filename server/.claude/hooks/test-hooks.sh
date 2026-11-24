@@ -71,12 +71,46 @@ expect "git add 경로 지정" 0 journal-check.sh "$(bash_cmd 'git add src/main/
 ( cd "$proj" && git reset -q ); mkdir -p "$tmp/client"; echo x > "$tmp/client/a.ts"; ( cd "$tmp" && git add client/a.ts )
 expect "server/ 밖의 변경만 있는 커밋" 0 journal-check.sh "$(bash_cmd 'git commit -m "feat: client"')"
 ( cd "$tmp" && git reset -q ); ( cd "$proj" && git add src/main/A.java docs/journal/2026-11-22-seobang.md )
+expect "git commit -am" 2 journal-check.sh "$(bash_cmd 'git commit -am "feat: a"')"
+expect "git commit -a -m" 2 journal-check.sh "$(bash_cmd 'git commit -a -m "feat: a"')"
+expect "git commit --all" 2 journal-check.sh "$(bash_cmd 'git commit --all -m "feat: a"')"
+expect "메시지 안의 -a는 막지 않는다" 0 journal-check.sh "$(bash_cmd 'git commit -m "feat: -a 옵션"')"
+expect "--amend는 막지 않는다" 0 journal-check.sh "$(bash_cmd 'git commit --amend --no-edit')"
+echo x > "$proj/.env"; ( cd "$proj" && git add .env )
+expect "스테이징된 .env" 2 journal-check.sh "$(bash_cmd 'git commit -m "feat: a"')"
+( cd "$proj" && git reset -q .env ); rm "$proj/.env"
+echo x > "$tmp/.env.local"; ( cd "$tmp" && git add .env.local )
+expect "server/ 밖의 .env.local도 막는다" 2 journal-check.sh "$(bash_cmd 'git commit -m "feat: a"')"
+( cd "$tmp" && git reset -q .env.local ); rm "$tmp/.env.local"
+mkdir -p "$proj/src/main/resources"; echo x > "$proj/src/main/resources/app.pem"; ( cd "$proj" && git add src/main/resources/app.pem )
+expect "스테이징된 .pem" 2 journal-check.sh "$(bash_cmd 'git commit -m "feat: a"')"
+( cd "$proj" && git reset -q src/main/resources/app.pem ); rm -r "$proj/src/main/resources"
+echo x > "$proj/.env.example"; ( cd "$proj" && git add .env.example )
+expect ".env.example은 통과" 0 journal-check.sh "$(bash_cmd 'git commit -m "feat: a"')"
+( cd "$proj" && git reset -q .env.example ); rm "$proj/.env.example"
 
 # pre-push-check
-( cd "$proj" && git commit -qm init )
+( cd "$proj" && git commit -qm init && git checkout -q -b feature/a )
 expect "check 기록 없이 push" 2 pre-push-check.sh "$(bash_cmd 'git push origin feature/a')"
 ( cd "$proj" && git rev-parse HEAD > "$(git rev-parse --git-path check-passed)" )
 expect "check 기록이 있는 push" 0 pre-push-check.sh "$(bash_cmd 'git push origin feature/a')"
+expect "기능 브랜치에서 인자 없는 push" 0 pre-push-check.sh "$(bash_cmd 'git push')"
+expect "이름에 main이 들어간 브랜치" 0 pre-push-check.sh "$(bash_cmd 'git push -u origin feature/main-page')"
+expect "main으로 push" 2 pre-push-check.sh "$(bash_cmd 'git push origin main')"
+expect "HEAD:main" 2 pre-push-check.sh "$(bash_cmd 'git push origin HEAD:main')"
+expect "refs/heads/main" 2 pre-push-check.sh "$(bash_cmd 'git push origin feature/a:refs/heads/main')"
+expect "-u origin develop" 2 pre-push-check.sh "$(bash_cmd 'git push -u origin develop')"
+expect "--force-with-lease" 2 pre-push-check.sh "$(bash_cmd 'git push --force-with-lease origin feature/a')"
+expect "-f" 2 pre-push-check.sh "$(bash_cmd 'git push -f origin feature/a')"
+expect "+refspec" 2 pre-push-check.sh "$(bash_cmd 'git push origin +feature/a')"
+expect "--all" 2 pre-push-check.sh "$(bash_cmd 'git push --all origin')"
+expect "명령을 이은 뒤의 main push" 2 pre-push-check.sh "$(bash_cmd 'git status && git push origin main')"
+expect "둘째 줄의 main push" 2 pre-push-check.sh "$(bash_cmd $'git status\ngit push origin main')"
+( cd "$proj" && git checkout -q -B main )
+expect "main에서 인자 없는 push" 2 pre-push-check.sh "$(bash_cmd 'git push')"
+expect "main에서 원격만 준 push" 2 pre-push-check.sh "$(bash_cmd 'git push origin')"
+expect "main에서 HEAD push" 2 pre-push-check.sh "$(bash_cmd 'git push origin HEAD')"
+( cd "$proj" && git checkout -q feature/a )
 
 # docs-lint
 mkdir -p "$proj/docs/adr"

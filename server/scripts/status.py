@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""문서와 git에서 지금 단계를 계산한다. 상태는 저장하지 않는다(ADR-0001의 10번).
+"""문서와 git에서 지금 단계를 계산한다. 상태는 저장하지 않는다.
 
 출력: 브랜치, 문서의 상태, 마지막 일지의 마지막 스텝의 "남은 일", 계산한 단계와 이유.
 단계는 추정이다. 구현과 검증이 끝났는지는 scripts/check.sh의 결과가 있어야 안다.
@@ -83,7 +83,7 @@ def unprocessed_reviews():
 
 
 def workspace_issues():
-    """_workspace/의 중간 산출물에서 옮기지 않은 리포트와 낡은 diff를 찾는다(ADR-0001의 23번)."""
+    """_workspace/의 중간 산출물에서 옮기지 않은 리포트와 낡은 diff를 찾는다."""
     ws = ROOT / "_workspace"
     if not ws.is_dir():
         return [], []
@@ -184,6 +184,19 @@ def compute(docs, issue=None):
     return "5. 구현 또는 6. 검증", reasons + ["테스트는 있다. 구현의 진행과 검증은 check.sh의 결과가 필요하다"]
 
 
+def stage_report(branch, docs):
+    """단계의 출력 줄. 브랜치에 이슈 번호가 없으면 슬라이스 밖이라고 먼저 알리고, 모든 문서로 계산한 단계는 참고로 보인다."""
+    issue = issue_of_branch(branch)
+    stage, reasons = compute(docs, issue)
+    if issue is not None:
+        return [f"단계(추정): {stage}"] + [f"  - {r}" for r in reasons]
+    return [
+        "단계: 슬라이스 밖 (브랜치에 이슈 번호가 없다)",
+        "  - 슬라이스는 `<종류>/<이슈번호>-<영문-요약>` 브랜치에서 한다. 새 슬라이스는 /next다",
+        f"  - 참고: 모든 문서로 계산한 단계는 {stage}",
+    ] + [f"    - {r}" for r in reasons]
+
+
 def main():
     branch = git("branch", "--show-current") or "(git 저장소가 아니거나 커밋이 없다)"
     docs = collect()
@@ -225,10 +238,9 @@ def main():
         print(f"  {where[0]} {where[1]}")
         for i in items:
             print(f"  - {i}")
-    stage, reasons = compute(docs, issue_of_branch(git("branch", "--show-current")))
-    print(f"\n단계(추정): {stage}")
-    for r in reasons:
-        print(f"  - {r}")
+    print()
+    for line in stage_report(branch, docs):
+        print(line)
 
 
 if __name__ == "__main__":

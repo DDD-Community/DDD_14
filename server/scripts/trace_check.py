@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""spec의 AC와 domain의 R이 테스트에 닿는지 확인한다(ADR-0001의 11번, ADR-0004의 N2.2).
+"""spec의 AC와 domain의 R이 테스트에 닿는지 확인한다(`@Covers`).
 
 - docs/spec, docs/domain의 표 첫 칸에 있는 `AC-n.m`, `R-n.m`을 모은다. 행에 "폐기"가 있으면 뺀다.
 - src/test의 `@Covers("AC-1.1")`, `@Covers({"AC-1.1", "R-1.2"})`에서 ID를 모은다.

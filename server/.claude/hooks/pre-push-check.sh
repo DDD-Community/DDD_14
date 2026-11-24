@@ -1,6 +1,10 @@
 #!/bin/bash
-# PreToolUse(Bash): git push 전에 현재 커밋을 scripts/check.sh로 검증했는지 확인한다.
-# check.sh가 통과하면 커밋 해시를 기록한다. 기록이 현재 커밋과 다르면 막는다.
+# PreToolUse(Bash): git push 전에 확인한다.
+#   - 보호 브랜치(main, develop)로 가는 push를 막는다. 대상은 refspec의 오른쪽이고, refspec이 없으면 지금 브랜치다.
+#   - force 계열(-f, --force, --force-with-lease, --force-if-includes, +refspec)과 --all, --mirror를 막는다.
+#   - 현재 커밋을 scripts/check.sh로 검증했는지 확인한다. check.sh가 통과하면 커밋 해시를 기록하고, 기록이 현재 커밋과 다르면 막는다.
+# 한계: 별칭, 변수, 셸 함수로 감싼 push와 사람이 터미널에서 직접 하는 push는 보지 못한다(CI와 브랜치 보호의 몫).
+# develop은 브랜치 전략이 정해지기 전의 가정이다.
 input=$(cat)
 tool=$(jq -r '.tool_name // empty' <<<"$input" 2>/dev/null)
 [ "$tool" = "Bash" ] || exit 0
@@ -8,6 +12,39 @@ cmd=$(jq -r '.tool_input.command // empty' <<<"$input" 2>/dev/null)
 cwd=$(jq -r '.cwd // empty' <<<"$input" 2>/dev/null)
 proj=${CLAUDE_PROJECT_DIR:-${cwd:-.}}
 grep -Eq '(^|[;&|[:space:]])git push( |$)' <<<"$cmd" || exit 0
+
+protected="main develop"
+is_protected() { local b=${1#refs/heads/}; [[ " $protected " == *" $b "* ]]; }
+block() { echo "차단: $1 실행하려던 명령: $cmd" >&2; exit 2; }
+
+seg=$(grep -E '(^|[;&|[:space:]])git push( |$)' <<<"$cmd" | head -1 | sed -E 's/.*(^|[;&|[:space:]])git push( |$)//')
+seg=${seg%%[;&|]*}
+read -ra words <<<"$(tr -d "\"'" <<<"$seg")"
+current=$(git -C "$proj" branch --show-current 2>/dev/null)
+positional=()
+skip=0
+for w in "${words[@]}"; do
+  if [ "$skip" = 1 ]; then skip=0; continue; fi
+  case "$w" in
+    -f|--force|--force-with-lease|--force-with-lease=*|--force-if-includes) block "force push는 하지 않는다." ;;
+    --all|--mirror) block "모든 브랜치를 한 번에 push하지 않는다. 브랜치를 지정한다." ;;
+    -o|--push-option|--repo|--receive-pack|--exec) skip=1 ;;
+    -*) ;;
+    *) positional+=("$w") ;;
+  esac
+done
+
+specs=("${positional[@]:1}")
+if [ ${#specs[@]} -eq 0 ]; then
+  is_protected "$current" && block "지금 브랜치($current)는 보호 브랜치다. main과 develop에는 직접 push하지 않는다."
+fi
+for spec in "${specs[@]}"; do
+  [[ "$spec" == +* ]] && block "force push(+refspec)는 하지 않는다."
+  if [[ "$spec" == *:* ]]; then dst=${spec##*:}; else dst=$spec; fi
+  [ "$dst" = "HEAD" ] && dst=$current
+  is_protected "$dst" && block "main과 develop에는 직접 push하지 않는다(대상: ${dst#refs/heads/}). PR로 병합한다."
+done
+
 rec=$(git -C "$proj" rev-parse --git-path check-passed 2>/dev/null)
 head=$(git -C "$proj" rev-parse HEAD 2>/dev/null)
 [ -z "$head" ] && exit 0

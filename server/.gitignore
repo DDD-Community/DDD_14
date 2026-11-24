@@ -13,3 +13,6 @@ build/
 .env
 .env.*
 !.env.example
+
+# 파이썬 캐시
+__pycache__/
