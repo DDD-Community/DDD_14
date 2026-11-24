@@ -6,7 +6,8 @@
 
 | 항목           | 도구                                                                                                                 | 설정 파일                                  |
 | -------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| 패키지 매니저  | pnpm                                                                                                                 | `pnpm-lock.yaml`                           |
+| 런타임         | Node `>=22.12.0` (Vite 8 요구 사항)                                                                                  | `package.json`의 `engines`                 |
+| 패키지 매니저  | pnpm `10.28.0` (고정)                                                                                                | `package.json`의 `packageManager`, `pnpm-lock.yaml` |
 | 빌드/개발 서버 | Vite + `@vitejs/plugin-react`, `@tailwindcss/vite`                                                                   | `vite.config.ts`                           |
 | 언어           | TypeScript `~7.0`                                                                                                    | `tsconfig*.json`                           |
 | Lint           | oxlint (`react`, `typescript`, `oxc`, `import`, `vitest` 플러그인) + 타입 인식 규칙(`oxlint-tsgolint`) + 커스텀 규칙 | `.oxlintrc.json`, `lint-plugins/ttadak.js` |
@@ -90,4 +91,5 @@
 
 ## 변경 이력
 
+- 2026-11-24: pnpm을 `10.28.0`으로 고정하고 Node 런타임 요구 사항(`>=22.12.0`)을 명시.
 - 2026-11-22: 경로를 `@/lib/*` → `@/shared/lib/*`로 변경 ([ADR 0002](../adr/0002-client-folder-structure.md)). 테스트 도구·test 환경 추가 ([ADR 0003](../adr/0003-client-test-stack.md)). 타입 인식 lint·커스텀 규칙·lefthook·스크립트 추가 ([ADR 0004](../adr/0004-agent-harness.md)).
