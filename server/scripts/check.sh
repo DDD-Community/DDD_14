@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # 슬라이스를 검증한다. 하나라도 실패하면 0이 아닌 값으로 끝난다.
-#   1. docs-lint: 문서 규칙
-#   2. trace: spec의 AC와 domain의 R이 테스트에 닿는지
-#   3. scripts의 단위 테스트
-#   4. 빌드와 테스트: ./gradlew check (Spotless 형식 검사와 ArchUnit 포함한 테스트). 빌드 파일이 아직 없으면 건너뛰고 표시한다.
+#   1. docs-lint: 문서 규칙과 문서의 지도
+#   2. trace: spec의 AC와 domain의 R이 테스트와 plan에 닿는지
+#   3. ref: 지시문이 가리키는 파일이 있는지
+#   4. scripts의 단위 테스트
+#   5. 빌드와 테스트: ./gradlew check (Spotless 형식 검사와 ArchUnit 포함한 테스트). 빌드 파일이 아직 없으면 건너뛰고 표시한다.
 # 통과하면 현재 커밋 해시를 기록한다. push 전에 그 기록을 확인할 수 있다.
 set -uo pipefail
 # 모노레포에서 server/가 프로젝트 폴더다. git 저장소의 맨 위가 아니라 이 스크립트의 위 폴더로 간다.
@@ -11,16 +12,19 @@ cd "$(cd "$(dirname "$0")/.." && pwd)"
 
 fail=0
 
-echo "[check] 1/4 docs-lint"
+echo "[check] 1/5 docs-lint"
 if ! python3 scripts/docs_lint.py --all; then fail=1; fi
 
-echo "[check] 2/4 trace"
+echo "[check] 2/5 trace"
 if ! python3 scripts/trace_check.py; then fail=1; fi
 
-echo "[check] 3/4 scripts 테스트"
+echo "[check] 3/5 ref"
+if ! python3 scripts/ref_check.py; then fail=1; fi
+
+echo "[check] 4/5 scripts 테스트"
 if ! python3 -m unittest discover -s scripts -p 'test_*.py' >/dev/null 2>&1; then echo "[check] scripts 테스트 실패. python3 -m unittest discover -s scripts -p 'test_*.py'로 확인한다" >&2; fail=1; fi
 
-echo "[check] 4/4 build and test"
+echo "[check] 5/5 build and test"
 if [ -x ./gradlew ]; then
   if ! ./gradlew check "$@"; then fail=1; fi
 else

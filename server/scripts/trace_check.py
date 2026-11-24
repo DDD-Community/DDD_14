@@ -6,6 +6,10 @@
 - ID에 테스트가 없으면 실패한다. 테스트가 없는 ID를 가리켜도 실패한다.
 - 근거: spec의 AC 행은 근거의 정책 번호(예: UPL-03)를 가진다. 정책이 아닌 기술 결정이면 행에 "기술 결정"을 쓴다.
   정책 번호는 docs/policy의 기록에 있어야 하고 위키 상태가 확정이어야 한다(검토 중과 미결정은 구현하지 않는다).
+- plan: 작업마다 다루는 ID가 있고, 그 ID가 spec이나 domain에 있다. plan이 다루는 spec과 domain의
+  살아 있는 AC와 R은 모두 어떤 plan의 작업에 있다.
+
+사용: trace_check.py   또는   trace_check.py --plan (plan만 검사한다. 테스트를 쓰기 전의 plan 단계에서 쓴다)
 """
 import re
 import sys
@@ -13,11 +17,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ID = re.compile(r"^(?:AC|R)-\d+\.\d+$")
+ID_IN_TEXT = re.compile(r"\b(?:AC|R)-\d+\.\d+\b")
 POLICY_ID = re.compile(r"\b[A-Z]{2,5}-\d{2,3}\b")
 TECH_BASIS = "기술 결정"
 
 
-def defined_ids():
+def defined_ids(include_retired=False):
     ids = {}
     for d in ("spec", "domain"):
         for f in sorted((ROOT / "docs" / d).glob("*.md")):
@@ -25,9 +30,46 @@ def defined_ids():
                 if not line.startswith("|"):
                     continue
                 cells = [c.strip() for c in line.strip().strip("|").split("|")]
-                if cells and ID.match(cells[0]) and "폐기" not in line:
+                if cells and ID.match(cells[0]) and (include_retired or "폐기" not in line):
                     ids[cells[0]] = f"{f.relative_to(ROOT)}:{n}"
     return ids
+
+
+def group_of(i):
+    """`AC-1.3`과 `R-1.3`의 무리는 `AC-1`과 `R-1`이다. 무리 하나가 spec이나 domain 하나다."""
+    return i.split(".")[0]
+
+
+def plan_problems():
+    """plan의 작업이 ID를 가지는지, plan이 다루는 spec과 domain의 ID를 모두 덮는지 검사한다."""
+    live, every = defined_ids(), defined_ids(include_retired=True)
+    in_plans = set()
+    problems = []
+    for f in sorted((ROOT / "docs" / "plan").glob("*.md")):
+        col = None
+        for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.startswith("|"):
+                col = None
+                continue
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if "다루는 ID" in cells:
+                col = cells.index("다루는 ID")
+                continue
+            if col is None or all(re.fullmatch(r":?-+:?", c) for c in cells if c) or len(cells) <= col:
+                continue
+            where = f"{f.relative_to(ROOT)}:{n}"
+            ids = ID_IN_TEXT.findall(cells[col])
+            if not ids:
+                problems.append(f"다루는 ID가 없는 작업: {cells[0]} ({where})")
+            for i in ids:
+                if i not in every:
+                    problems.append(f"plan이 정의에 없는 ID를 가리킨다: {i} ({where})")
+            in_plans.update(ids)
+    groups = {group_of(i) for i in in_plans}
+    for i, where in sorted(live.items()):
+        if group_of(i) in groups and i not in in_plans:
+            problems.append(f"plan의 작업에 없는 ID: {i} ({where})")
+    return problems
 
 
 def policy_status():
@@ -81,9 +123,15 @@ def covered_ids():
     return cov
 
 
-def main():
+def main(argv):
+    if argv == ["--plan"]:
+        problems = plan_problems()
+        for p in problems:
+            print(p)
+        print(f"trace --plan: 문제 {len(problems)}건")
+        return 1 if problems else 0
     defined, covered = defined_ids(), covered_ids()
-    problems = basis_problems()
+    problems = basis_problems() + plan_problems()
     for i, where in sorted(defined.items()):
         if i not in covered:
             problems.append(f"테스트가 없는 ID: {i} ({where})")
@@ -100,4 +148,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
