@@ -1,0 +1,78 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc", "import", "vitest"],
+  "jsPlugins": ["./lint-plugins/ttadak.js"],
+  "options": {
+    "typeAware": true
+  },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": [
+      "warn",
+      {
+        "allow": ["**/*.css", "@testing-library/jest-dom/vitest"]
+      }
+    ],
+    "import/no-named-as-default-member": "off",
+    "typescript/no-floating-promises": "error",
+    "import/no-cycle": "error",
+    "vitest/no-disabled-tests": "error",
+    "vitest/no-focused-tests": "error",
+    "ttadak/architecture": "error",
+    "ttadak/no-env-mode": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "axios",
+            "message": "API 요청은 '@/shared/lib/api'의 api 인스턴스를 쓰세요. (docs/specs/client-tooling.md)",
+            "allowTypeImports": true
+          },
+          {
+            "name": "clsx",
+            "message": "className 결합은 '@/shared/lib/cn'의 cn()을 쓰세요.",
+            "allowTypeImports": true
+          },
+          {
+            "name": "tailwind-merge",
+            "message": "className 결합은 '@/shared/lib/cn'의 cn()을 쓰세요.",
+            "allowTypeImports": true
+          }
+        ],
+        "patterns": [
+          {
+            "regex": "^\\.\\./",
+            "message": "상위 디렉터리 상대경로 대신 '@/' 별칭을 쓰세요."
+          }
+        ]
+      }
+    ],
+    "vitest/require-mock-type-parameters": "off"
+  },
+  "overrides": [
+    {
+      "files": ["src/shared/lib/api.ts", "src/shared/lib/cn.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "src/test/**"],
+      "rules": {
+        "typescript/unbound-method": "off"
+      }
+    }
+  ]
+}

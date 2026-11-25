@@ -1,0 +1,7 @@
+dist
+node_modules
+pnpm-lock.yaml
+
+# 브라우저 확인 출력 (ui-verification)
+.playwright-cli
+.screenshots

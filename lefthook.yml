@@ -1,0 +1,21 @@
+# git hook 설정. client/에서 pnpm install을 하면 자동으로 등록된다.
+# 규칙: client/docs/rules/git-workflow.md
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: format
+      root: client/
+      glob: '*.{ts,tsx,js,mjs,json,css,md,html,yml,yaml}'
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+
+    - name: lint
+      root: client/
+      glob: '*.{ts,tsx,js,mjs}'
+      run: pnpm exec oxlint {staged_files}
+
+commit-msg:
+  jobs:
+    - name: conventional-commit
+      run: node client/scripts/check-commit-msg.mjs {1}
