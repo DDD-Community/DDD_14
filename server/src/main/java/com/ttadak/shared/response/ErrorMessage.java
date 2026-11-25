@@ -17,12 +17,7 @@ public record ErrorMessage(
     }
 
     public ErrorMessage(ErrorCode errorCode, Object data) {
-        this(
-            errorCode.getStatus().value(),
-            errorCode.name(),
-            errorCode.getMessage(),
-            data
-        );
+        this(errorCode.getStatus().value(), errorCode.name(), errorCode.getMessage(), data);
     }
 
 }

@@ -217,7 +217,10 @@ class ErrorResponseTest {
             .bodyJson()
             .hasPathSatisfying("$.result", v -> v.assertThat().isEqualTo("ERROR"))
             .hasPathSatisfying("$.error.code", v -> v.assertThat().isEqualTo("DEFAULT_INTERNAL_ERROR"))
-            .hasPathSatisfying("$.error.message", v -> v.assertThat().isEqualTo(ErrorCode.DEFAULT_INTERNAL_ERROR.getMessage()));
+            .hasPathSatisfying(
+                "$.error.message",
+                v -> v.assertThat().isEqualTo(ErrorCode.DEFAULT_INTERNAL_ERROR.getMessage())
+            );
     }
 
     @Test
@@ -278,8 +281,11 @@ class ErrorResponseTest {
     }
 
     record ProbeRequest(
-        @NotBlank(message = "제목은 필수입니다.") String title,
-        @Size(min = 2, max = 5, message = "선택지는 2~5개여야 합니다.") List<String> options
+        @NotBlank(message = "제목은 필수입니다.")
+        String title,
+
+        @Size(min = 2, max = 5, message = "선택지는 2~5개여야 합니다.")
+        List<String> options
     ) {
 
     }

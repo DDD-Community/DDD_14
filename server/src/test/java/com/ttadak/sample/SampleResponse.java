@@ -22,7 +22,12 @@ public record SampleResponse(
     }
 
     /** 값 여러 개로 만든다. 엔티티가 없을 때(조회 전용 쿼리의 결과 등)나 엔티티 밖의 값을 함께 담을 때 쓴다. */
-    public static SampleResponse of(Long id, String name, int price, boolean soldOut) {
+    public static SampleResponse of(
+        Long id,
+        String name,
+        int price,
+        boolean soldOut
+    ) {
         return SampleResponse.builder()
             .id(id)
             .name(name)

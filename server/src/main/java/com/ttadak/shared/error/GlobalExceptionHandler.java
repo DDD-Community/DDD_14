@@ -31,7 +31,9 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
 
         return ResponseEntity.status(errorCode.getStatus())
-            .body(ex.getErrors().isEmpty() ? ApiResponse.error(errorCode) : ApiResponse.error(errorCode, ex.getErrors()));
+            .body(
+                ex.getErrors().isEmpty() ? ApiResponse.error(errorCode) : ApiResponse.error(errorCode, ex.getErrors())
+            );
     }
 
     @ExceptionHandler(Exception.class)
@@ -90,7 +92,8 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorCode errorCode = codeOf(statusCode);
         logByLevel(
             errorCode.getLogLevel(),
-            "[GlobalExceptionHandler] 예외 응답 - type=%s, message=%s".formatted(ex.getClass().getSimpleName(), ex.getMessage()),
+            "[GlobalExceptionHandler] 예외 응답 - type=%s, message=%s"
+                .formatted(ex.getClass().getSimpleName(), ex.getMessage()),
             ex
         );
 
@@ -108,7 +111,8 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             case 404 -> ErrorCode.DEFAULT_NOT_FOUND;
             case 405 -> ErrorCode.DEFAULT_METHOD_NOT_ALLOWED;
             case 415 -> ErrorCode.DEFAULT_UNSUPPORTED_MEDIA_TYPE;
-            default -> status.is5xxServerError() ? ErrorCode.DEFAULT_INTERNAL_ERROR : ErrorCode.DEFAULT_MALFORMED_REQUEST;
+            default ->
+                status.is5xxServerError() ? ErrorCode.DEFAULT_INTERNAL_ERROR : ErrorCode.DEFAULT_MALFORMED_REQUEST;
         };
     }
 
