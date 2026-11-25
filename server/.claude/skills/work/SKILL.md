@@ -88,7 +88,7 @@ description: "서버의 슬라이스 하나를 정책 읽기부터 종료까지 
 ## 중간 산출물
 
 - 리뷰어의 리포트는 받는 즉시 `shared/리뷰-결과-합치기.md`로 슬라이스의 리뷰 문서에 기록한다. 따로 저장하지 않는다.
-- `_workspace/`에는 에이전트에게 넘기는 diff(`diff-NN.patch`, NN은 슬라이스 번호), `test-author`의 노트(`test-author-NN-<작업 번호>.md`), r2의 리뷰어에게 넘기는 그 리뷰어의 r1 리포트(`review-NN-<리뷰어>.md`), 커밋을 다시 나누는 동안의 전체 일지(`_workspace/journal-full.md`), PR의 설명(`pr-<영문-요약>.md`)만 둔다. 같은 이름은 덮어쓴다. git에 올리지 않는다.
+- `_workspace/`에는 에이전트에게 넘기는 diff(`diff-NN.patch`, NN은 슬라이스 번호), `test-author`의 노트(`test-author-NN-<작업 번호>.md`), r2의 리뷰어에게 넘기는 그 리뷰어의 r1 리포트(`review-NN-<리뷰어>.md`), 커밋을 다시 나누는 동안의 전체 일지(`_workspace/journal-full.md`), PR의 설명(`pr-<영문-요약>.md`), 이슈의 본문(`issue-<영문-요약>.md`)만 둔다. 같은 이름은 덮어쓴다. git에 올리지 않는다.
 
 ## 공통 규칙
 
