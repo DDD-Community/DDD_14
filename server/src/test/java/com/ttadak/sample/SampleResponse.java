@@ -1,13 +1,21 @@
 package com.ttadak.sample;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Builder;
 
 @Builder(access = AccessLevel.PRIVATE)
 public record SampleResponse(
+    @Schema(description = "샘플 id", example = "1")
     Long id,
+
+    @Schema(description = "샘플 이름", example = "예시")
     String name,
+
+    @Schema(description = "가격", example = "1000")
     int price,
+
+    @Schema(description = "품절 여부", example = "false")
     boolean soldOut
 ) {
 

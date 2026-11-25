@@ -15,7 +15,7 @@ class SampleController extends SampleControllerDocs {
 
     @Override
     @GetMapping("/{id}")
-    public ApiResponse<SampleResponse> get(@PathVariable Long id) {
+    public ApiResponse<SampleResponse> findSample(@PathVariable Long id) {
         return ApiResponse.success(SampleResponse.of(id, "예시", 1000, false));
     }
 

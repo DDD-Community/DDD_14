@@ -47,3 +47,20 @@
 
 **남은 일**:
 - ADR-0002의 요구 12와 ADR-0006의 C1, C2를 PR #3에서 맞춘다.
+
+## 스텝 3. 기준 코드를 새 ADR 규칙에 맞춘다
+
+**요청 (사용자)**: 기준 코드(`src/test/java/com/ttadak/sample`)를 고친다.
+
+**한 일 (AI)**:
+1. 조회 메서드의 이름을 `get`에서 `findSample`로 바꿨다(ADR-0006의 1.10).
+2. `SampleCreateRequest`와 `SampleResponse`의 필드에 `@Schema`를 달았다(5.2).
+3. `SampleControllerDocs`의 `@Operation` 설명에 오류 코드와 상태를 적었다(5.3).
+4. `SampleEntity`가 받는 `Price`의 `null`을 `requireNonNull`로 막고(4.8), 이름과 재고의 검사를 `validate` 하나에 모았다(4.10).
+5. `./gradlew check`가 통과했다.
+
+**관찰**:
+- 위 번호의 ADR은 PR #3에 있고 이 브랜치에는 아직 없다.
+
+**남은 일**:
+- 사용자가 확인한 뒤 두 브랜치를 push하고 PR #4의 설명을 고친다.
