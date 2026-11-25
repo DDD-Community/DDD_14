@@ -1,11 +1,11 @@
 #!/bin/bash
 # 슬라이스의 브랜치를 만든다. 사용: scripts/start-slice.sh <이슈번호> <영문-요약> [종류]
-# 이름은 <종류>/<이슈번호>-<영문-요약>이다. 종류는 커밋 종류와 같고 기본은 feat다. push하지 않는다.
+# 이름은 <종류>/<이슈번호>-<영문-요약>이다. 종류는 Git Workflow Rule의 브랜치 접두사 여섯 개이고 기본은 feat다. push하지 않는다.
 # 조건: main에 있고, 작업 트리가 깨끗하다. main이 원격의 main보다 뒤처졌으면 fast-forward로 맞춘다.
 set -e
 num=$1; slug=$2; kind=${3:-feat}
 [ -n "$num" ] && [ -n "$slug" ] || { echo "사용: scripts/start-slice.sh <이슈번호> <영문-요약> [종류]" >&2; exit 2; }
-case "$kind" in test|file|docs|chore|setting|feat|refactor|fix) ;; *) echo "종류는 test, file, docs, chore, setting, feat, refactor, fix 중 하나다: $kind" >&2; exit 2 ;; esac
+case "$kind" in feat|fix|chore|docs|refactor|test) ;; *) echo "브랜치의 종류는 feat, fix, chore, docs, refactor, test 중 하나다: $kind" >&2; exit 2 ;; esac
 [[ "$num" =~ ^[0-9]+$ ]] || { echo "이슈 번호는 숫자여야 한다: $num" >&2; exit 2; }
 [[ "$slug" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || { echo "영문 요약은 소문자, 숫자, 하이픈이다(예: family-members): $slug" >&2; exit 2; }
 proj=${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}

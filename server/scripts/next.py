@@ -50,12 +50,12 @@ def visible(issue, label):
     return not roles or label in roles
 
 
-KINDS = ("test", "file", "docs", "chore", "setting", "feat", "refactor", "fix")
+KINDS = ("feat", "fix", "chore", "docs", "refactor", "test", "style", "perf", "ci", "build", "revert")
 
 
 def kind_of(title):
-    """제목의 앞부분 `종류: `에서 종류를 읽는다. 없으면 None이다."""
-    m = re.match(r"\s*([a-z]+)\s*:", title or "")
+    """제목의 앞부분 `종류: `나 `종류(범위): `에서 종류를 읽는다. 없으면 None이다."""
+    m = re.match(r"\s*([a-z]+)(?:\([^)]+\))?!?\s*:", title or "")
     return m.group(1) if m and m.group(1) in KINDS else None
 
 
