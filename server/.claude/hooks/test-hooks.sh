@@ -107,7 +107,7 @@ expect "이름에 main이 들어간 브랜치" 0 pre-push-check.sh "$(bash_cmd '
 expect "main으로 push" 2 pre-push-check.sh "$(bash_cmd 'git push origin main')"
 expect "HEAD:main" 2 pre-push-check.sh "$(bash_cmd 'git push origin HEAD:main')"
 expect "refs/heads/main" 2 pre-push-check.sh "$(bash_cmd 'git push origin feature/a:refs/heads/main')"
-expect "-u origin develop" 2 pre-push-check.sh "$(bash_cmd 'git push -u origin develop')"
+expect "-u origin main" 2 pre-push-check.sh "$(bash_cmd 'git push -u origin main')"
 expect "--force-with-lease" 2 pre-push-check.sh "$(bash_cmd 'git push --force-with-lease origin feature/a')"
 expect "-f" 2 pre-push-check.sh "$(bash_cmd 'git push -f origin feature/a')"
 expect "+refspec" 2 pre-push-check.sh "$(bash_cmd 'git push origin +feature/a')"

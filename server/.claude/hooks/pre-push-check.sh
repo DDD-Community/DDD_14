@@ -1,11 +1,10 @@
 #!/bin/bash
 # PreToolUse(Bash): git push 전에 확인한다.
-#   - 보호 브랜치(main, develop)로 가는 push를 막는다. 대상은 refspec의 오른쪽이고, refspec이 없으면 지금 브랜치다.
+#   - 보호 브랜치(main)로 가는 push를 막는다. 대상은 refspec의 오른쪽이고, refspec이 없으면 지금 브랜치다.
 #   - force 계열(-f, --force, --force-with-lease, --force-if-includes, +refspec)과 --all, --mirror를 막는다.
 #   - 현재 커밋을 scripts/check.sh로 검증했는지 확인한다. check.sh가 통과하면 커밋 해시를 기록하고, 기록이 현재 커밋과 다르면 막는다.
 # 한계: 별칭, 변수, 셸 함수로 감싼 push와 사람이 터미널에서 직접 하는 push는 보지 못한다(CI와 브랜치 보호의 몫).
 #   heredoc 본문 안의 push(예: bash <<EOF로 넘기는 스크립트)도 보지 못한다.
-# develop은 브랜치 전략이 정해지기 전의 가정이다.
 input=$(cat)
 tool=$(jq -r '.tool_name // empty' <<<"$input" 2>/dev/null)
 [ "$tool" = "Bash" ] || exit 0
@@ -26,7 +25,7 @@ code=$(awk -v q="'" '
   }' <<<"$cmd")
 grep -Eq '(^|[;&|[:space:]])git push( |$)' <<<"$code" || exit 0
 
-protected="main develop"
+protected="main"
 is_protected() { local b=${1#refs/heads/}; [[ " $protected " == *" $b "* ]]; }
 block() { echo "차단: $1 실행하려던 명령: $cmd" >&2; exit 2; }
 
@@ -49,13 +48,13 @@ done
 
 specs=("${positional[@]:1}")
 if [ ${#specs[@]} -eq 0 ]; then
-  is_protected "$current" && block "지금 브랜치($current)는 보호 브랜치다. main과 develop에는 직접 push하지 않는다."
+  is_protected "$current" && block "지금 브랜치($current)는 보호 브랜치다. main에는 직접 push하지 않는다."
 fi
 for spec in "${specs[@]}"; do
   [[ "$spec" == +* ]] && block "force push(+refspec)는 하지 않는다."
   if [[ "$spec" == *:* ]]; then dst=${spec##*:}; else dst=$spec; fi
   [ "$dst" = "HEAD" ] && dst=$current
-  is_protected "$dst" && block "main과 develop에는 직접 push하지 않는다(대상: ${dst#refs/heads/}). PR로 병합한다."
+  is_protected "$dst" && block "main에는 직접 push하지 않는다(대상: ${dst#refs/heads/}). PR로 병합한다."
 done
 
 rec=$(git -C "$proj" rev-parse --git-path check-passed 2>/dev/null)

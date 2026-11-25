@@ -42,7 +42,6 @@
       "Read(./.env.*)",
       "Bash(rm -rf:*)",
       "Bash(git push origin main:*)",
-      "Bash(git push origin develop:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(gh pr merge:*)"

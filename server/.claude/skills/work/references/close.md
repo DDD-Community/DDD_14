@@ -21,5 +21,5 @@
 
 ## 하지 않는 일
 
-- 병합, `main`과 `develop`에 직접 push, force push를 하지 않는다. 이유: 병합은 사람이 한다(ADR-0001의 3번).
+- 병합, `main`에 직접 push, force push를 하지 않는다. 이유: 병합은 사람이 한다(ADR-0001의 3번).
 - `check.sh`를 거치지 않은 커밋을 push하지 않는다.

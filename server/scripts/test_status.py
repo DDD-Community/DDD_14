@@ -31,7 +31,7 @@ class PerSlice(unittest.TestCase):
 
     def test_브랜치에서_이슈_번호를_읽는다(self):
         self.assertEqual(status.issue_of_branch("feat/20-new-feature"), 20)
-        self.assertIsNone(status.issue_of_branch("develop"))
+        self.assertIsNone(status.issue_of_branch("main"))
         self.assertIsNone(status.issue_of_branch("docs/branch-kinds"))
 
     def test_새_이슈는_정책_읽기부터다(self):
