@@ -12,15 +12,15 @@ DDD 14기 프로젝트 모노레포. 이 파일은 어느 작업이 어느 폴�
 
 - 세션은 **레포 루트에서 시작**한다. 서버 코드도 함께 참고할 수 있다.
 - **`client/AGENTS.md`와 client 하네스를 따른다.** client 하네스는 `client/.agents/skills/`(스킬)와 `client/scripts/agent-hooks/`(훅)이며, 루트 `.claude/settings.json`·`.codex/hooks.json`은 이 훅을 등록만 한다.
-- `server/`의 코드와 문서는 참고만 한다. `server/`의 작업 절차(일지, 슬라이스 등)는 따르지 않고, 사용자가 시키지 않으면 `server/` 파일을 고치지 않는다.
+- `server/`의 코드와 문서는 참고만 한다. `server/`의 AGENTS.md·스킬·작업 절차(일지, 슬라이스 등)는 따르지 않고, 사용자가 시키지 않으면 `server/` 파일을 고치지 않는다.
 
 ## 함께 지키는 것
 
-FE·BE 모두 같은 규칙과 템플릿을 쓴다. 절차(스킬)는 각 영역 하네스에 있다.
+FE·BE 모두 같은 규칙과 템플릿을 쓴다. 절차(스킬)는 각 영역 하네스에 있다. 경로는 레포 루트 기준이다.
 
 | 항목        | 기준                                             |
 | ----------- | ------------------------------------------------ |
 | 브랜치·커밋 | `client/docs/rules/git-workflow.md`              |
 | PR          | `.github/pull_request_template.md`, squash merge |
-| 이슈        | `.github/ISSUE_TEMPLATE/`                        |
+| 이슈        | `.github/ISSUE_TEMPLATE/` (PR #5 병합 후)        |
 | AI 금지     | PR 병합, `main` push, force push                 |

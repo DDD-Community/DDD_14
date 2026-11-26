@@ -21,7 +21,7 @@ BE가 `server/` 안에 자체 하네스를 만들었다(PR #3). BE 하네스는 
 | FE 하네스      | `client/`로 옮긴다. 스킬은 `client/.agents/skills/`(Claude용 링크는 `client/.claude/skills/`), 훅 스크립트는 `client/scripts/agent-hooks/`                                                                                   |
 | 팀 스킬 이름   | `client-` 접두사를 붙인다(`client-new-feature`, `client-review-changes`, `client-verify-ui`, `client-write-adr`)                                                                                                             |
 | 세션 시작 위치 | FE는 레포 루트, BE는 `server/`. 루트 AGENTS.md 맨 위에 백엔드는 `server/` 하네스만 따른다고 밝힌다                                                                                                                           |
-| 규칙 적용      | 작업하는 폴더의 규칙만 따르고, 다른 폴더는 참고만 한다. 공용 규칙(브랜치·커밋, PR·이슈 템플릿, PR 병합·`main` push·force push 금지)만 함께 따른다                                                                            |
+| 규칙 적용      | 작업하는 폴더의 규칙만 따르고, 다른 폴더의 AGENTS.md·스킬·작업 절차는 따르지 않는다(코드와 문서는 참고만 한다). 공용 규칙(브랜치·커밋, PR·이슈 템플릿, PR 병합·`main` push·force push 금지)만 함께 따른다                    |
 | 훅 안내        | 훅이 스킬을 요청할 때 `SKILL.md` 경로를 함께 준다. 루트에서 시작한 Codex는 `client/` 안의 스킬을 자동으로 찾지 못하기 때문이다                                                                                               |
 | Codex 훅       | Codex는 BE 세션에서도 루트 `.codex/hooks.json`을 읽는다. 그래서 node가 없으면 넘어가게 하고, 훅은 `client/` 변경이 없으면 아무것도 하지 않는다                                                                               |
 | git hook 등록  | pnpm 10은 의존성의 설치 스크립트를 막고, 허용해도 빌드 결과를 캐시하면 다시 실행하지 않는다. 그래서 client의 `prepare` 스크립트에서 `lefthook install`을 실행한다                                                            |
@@ -37,6 +37,6 @@ BE가 `server/` 안에 자체 하네스를 만들었다(PR #3). BE 하네스는 
 
 ## 결과 (Consequences)
 
-- BE 세션에는 FE 스킬·훅이 보이지 않는다. 루트 AGENTS.md는 BE 세션에도 읽히지만, 백엔드는 `server/` 하네스를 따르라고 안내하는 내용뿐이다.
-- FE는 루트에서 시작해 서버 코드를 참고할 수 있다. `server/` 파일을 읽으면 `server/AGENTS.md`도 함께 불려오므로, 루트 AGENTS.md의 "작업하는 폴더의 규칙만 따른다"에 기댄다.
+- BE의 Claude 세션에는 FE 스킬·훅이 보이지 않는다. 예외로 Codex는 BE 세션에서도 루트 Stop 훅을 실행하지만, `client/` 변경이 없으면 바로 끝난다. 루트 AGENTS.md는 BE 세션에도 읽히지만, 백엔드는 `server/` 하네스를 따르라고 안내하는 내용뿐이다.
+- FE는 루트에서 시작해 서버 코드를 참고할 수 있다. `server/` 파일을 읽으면 `server/AGENTS.md`도 함께 불려오므로, 루트 AGENTS.md의 "`server/`의 AGENTS.md·스킬·작업 절차는 따르지 않는다"에 기댄다.
 - 공용 Git 규칙(`client/docs/rules/git-workflow.md`)은 BE 문서가 이 경로를 참조하고 있어서 그대로 둔다. 루트로 옮기는 일과 공용 PR·이슈 스킬은 BE와 함께 정한다.
