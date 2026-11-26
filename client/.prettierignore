@@ -5,3 +5,8 @@ pnpm-lock.yaml
 # 브라우저 확인 출력 (ui-verification)
 .playwright-cli
 .screenshots
+
+# 에이전트 스킬 (외부 스킬은 원본을 그대로 둔다)
+.agents
+.claude
+skills-lock.json

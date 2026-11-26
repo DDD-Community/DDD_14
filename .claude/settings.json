@@ -9,7 +9,12 @@
     "deny": [
       "Read(./client/.env.local)",
       "Read(./client/.env.*.local)",
-      "Edit(./client/pnpm-lock.yaml)"
+      "Edit(./client/pnpm-lock.yaml)",
+      "Bash(gh pr merge:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git push origin HEAD:main:*)"
     ]
   },
   "hooks": {
@@ -18,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/session-start.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/client/scripts/agent-hooks/session-start.mjs"
           }
         ]
       }
@@ -29,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/plan-gate.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/client/scripts/agent-hooks/plan-gate.mjs"
           }
         ]
       }
@@ -40,7 +45,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/format-edited-file.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/client/scripts/agent-hooks/format-edited-file.mjs"
           }
         ]
       }
@@ -50,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/tools/agent-hooks/stop-gate.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/client/scripts/agent-hooks/stop-gate.mjs"
           }
         ]
       }
