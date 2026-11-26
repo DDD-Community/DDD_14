@@ -4,17 +4,18 @@
 
 ## 구성
 
-| 항목           | 도구                                                                                                                 | 설정 파일                                           |
-| -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| 런타임         | Node `>=22.12.0` (Vite 8 요구 사항)                                                                                  | `package.json`의 `engines`                          |
-| 패키지 매니저  | pnpm `10.28.0` (고정)                                                                                                | `package.json`의 `packageManager`, `pnpm-lock.yaml` |
-| 빌드/개발 서버 | Vite + `@vitejs/plugin-react`, `@tailwindcss/vite`                                                                   | `vite.config.ts`                                    |
-| 언어           | TypeScript `~7.0`                                                                                                    | `tsconfig*.json`                                    |
-| Lint           | oxlint (`react`, `typescript`, `oxc`, `import`, `vitest` 플러그인) + 타입 인식 규칙(`oxlint-tsgolint`) + 커스텀 규칙 | `.oxlintrc.json`, `lint-plugins/ttadak.js`          |
-| Format         | Prettier (세미콜론, 작은따옴표, trailingComma all, printWidth 100)                                                   | `.prettierrc.json`, `.prettierignore`               |
-| 테스트         | Vitest + jsdom + React Testing Library + MSW                                                                         | `vite.config.ts`의 `test`, `src/test/`              |
-| git hook       | lefthook (pre-commit: Prettier·oxlint, commit-msg: 형식 검사)                                                        | 루트 `lefthook.yml`                                 |
-| 브라우저 확인  | `@playwright/cli`                                                                                                    | —                                                   |
+| 항목            | 도구                                                                                                                 | 설정 파일                                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 런타임          | Node `>=22.12.0` (Vite 8 요구 사항)                                                                                  | `package.json`의 `engines`                                                                                     |
+| 패키지 매니저   | pnpm `10.28.0` (고정)                                                                                                | `package.json`의 `packageManager`, `pnpm-lock.yaml`                                                            |
+| 빌드/개발 서버  | Vite + `@vitejs/plugin-react`, `@tailwindcss/vite`                                                                   | `vite.config.ts`                                                                                               |
+| 언어            | TypeScript `~7.0`                                                                                                    | `tsconfig*.json`                                                                                               |
+| Lint            | oxlint (`react`, `typescript`, `oxc`, `import`, `vitest` 플러그인) + 타입 인식 규칙(`oxlint-tsgolint`) + 커스텀 규칙 | `.oxlintrc.json`, `lint-plugins/ttadak.js`                                                                     |
+| Format          | Prettier (세미콜론, 작은따옴표, trailingComma all, printWidth 100)                                                   | `.prettierrc.json`, `.prettierignore`                                                                          |
+| 테스트          | Vitest + jsdom + React Testing Library + MSW                                                                         | `vite.config.ts`의 `test`, `src/test/`                                                                         |
+| git hook        | lefthook (pre-commit: Prettier·oxlint, commit-msg: 형식 검사). `pnpm install` 때 `prepare`가 등록                    | 루트 `lefthook.yml`                                                                                            |
+| 브라우저 확인   | `@playwright/cli`                                                                                                    | —                                                                                                              |
+| 에이전트 하네스 | 스킬·훅 (레포 루트 세션용)                                                                                           | `.agents/skills/`, `.claude/skills/`, `scripts/agent-hooks/`, 루트 `.claude/settings.json`·`.codex/hooks.json` |
 
 ## 주요 라이브러리
 
@@ -91,5 +92,6 @@
 
 ## 변경 이력
 
+- 2026-11-26: 에이전트 스킬·훅을 `client/`로 옮기고, git hook을 `prepare` 스크립트로 등록하도록 변경 ([ADR 0005](../adr/0005-harness-per-area.md)).
 - 2026-11-24: pnpm을 `10.28.0`으로 고정하고 Node 런타임 요구 사항(`>=22.12.0`)을 명시.
 - 2026-11-22: 경로를 `@/lib/*` → `@/shared/lib/*`로 변경 ([ADR 0002](../adr/0002-client-folder-structure.md)). 테스트 도구·test 환경 추가 ([ADR 0003](../adr/0003-client-test-stack.md)). 타입 인식 lint·커스텀 규칙·lefthook·스크립트 추가 ([ADR 0004](../adr/0004-agent-harness.md)).

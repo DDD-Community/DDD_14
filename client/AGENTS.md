@@ -1,7 +1,7 @@
 # Client
 
 타닥 웹 프론트엔드. React 19 · TypeScript 7 · Vite · Tailwind v4 · TanStack Query · zustand.
-명령은 `client/`에서 pnpm으로 실행한다.
+에이전트 세션은 **레포 루트에서 시작**하고(서버 코드도 참고할 수 있다), 명령은 `client/`에서 pnpm으로 실행한다.
 
 ## 명령어
 
@@ -27,8 +27,19 @@
 - 한 번에 하나의 기능 슬라이스만 구현한다.
 - 새 의존성 추가는 ADR 대상이다. 설치 전에 사람에게 먼저 묻는다.
 - lint 오류 메시지에는 고치는 방법이 적혀 있다. 규칙을 끄지 말고 메시지대로 고친다.
-- 반복 절차는 스킬을 쓴다: `new-feature`(기능 구현), `verify-ui`(화면 확인), `write-adr`(결정 기록), `review-changes`(변경 리뷰).
-- 훅이 스킬 실행을 요청하면 그대로 따른다.
+- 반복 절차는 스킬을 쓴다: `client-new-feature`(기능 구현), `client-verify-ui`(화면 확인), `client-write-adr`(결정 기록), `client-review-changes`(변경 리뷰).
+- 훅이 스킬 실행을 요청하면 그대로 따른다. 스킬을 찾지 못하면 훅이 알려 준 `SKILL.md` 경로를 읽고 따른다.
+- `server/`는 참고만 하고 고치지 않는다. `server/`의 규칙과 작업 절차는 백엔드 세션(`server/`에서 시작)용이다.
+
+## 하네스 위치
+
+| 무엇           | 위치                                                                 |
+| -------------- | -------------------------------------------------------------------- |
+| 스킬           | `.agents/skills/` (원본), `.claude/skills/` (Claude용 링크)          |
+| 외부 스킬 잠금 | `skills-lock.json` (`npx skills add`는 `client/`에서 실행)           |
+| 훅 스크립트    | `scripts/agent-hooks/`                                               |
+| 훅 등록        | 레포 루트 `.claude/settings.json`, `.codex/hooks.json` (루트 세션용) |
+| git hook       | 레포 루트 `lefthook.yml`. `pnpm install` 때 `prepare`가 등록한다     |
 
 ## 문서 지도
 

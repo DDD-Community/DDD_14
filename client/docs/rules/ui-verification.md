@@ -2,7 +2,7 @@
 
 화면 파일(`.tsx`, `.css`)을 바꾸면 브라우저에서 직접 확인한다. 타입 체크와 테스트는 화면이 실제로 맞게 보이는지 보장하지 않는다.
 
-## 절차 (`verify-ui` 스킬)
+## 절차 (`client-verify-ui` 스킬)
 
 1. `client/`에서 `pnpm dev`를 띄운다 (http://localhost:5173). 이미 떠 있으면 그대로 쓴다.
 2. `pnpm exec playwright-cli`로 바뀐 화면을 연다. 사용자처럼 클릭하고 입력해서 바뀐 동작을 확인한다.

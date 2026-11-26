@@ -1,22 +1,26 @@
 # 타닥 (TTADAK)
 
-DDD 14기 프로젝트 모노레포.
+DDD 14기 프로젝트 모노레포. 이 파일은 어느 작업이 어느 폴더와 하네스를 따르는지만 정한다.
 
-| 경로      | 내용                              | 가이드                               |
-| --------- | --------------------------------- | ------------------------------------ |
-| `client/` | 웹 프론트엔드 (React + TS + Vite) | [client/AGENTS.md](client/AGENTS.md) |
-| `server/` | 백엔드                            | [server/AGENTS.md](server/AGENTS.md) |
+## 백엔드 개발 → `server/`
 
-- 작업하는 디렉터리의 AGENTS.md를 먼저 읽는다. 명령은 각 디렉터리 안에서 실행한다.
-- 에이전트(Claude Code, Codex)는 레포 루트에서 실행한다. 훅과 스킬 설정이 루트에 있다.
-- 커밋은 Conventional Commits 형식, 요약은 한국어로 쓴다. 예: `feat: 로그인 폼 추가`
-- `main`에서 브랜치를 따고 PR로만 머지한다. 자세한 규칙은 [git-workflow](client/docs/rules/git-workflow.md).
+- 세션은 **`server/`에서 시작**한다.
+- **`server/AGENTS.md`와 server 하네스만 따른다.** server 하네스는 `server/.claude/`(훅·스킬·에이전트)와 `server/docs/`이며, 자세한 안내는 `server/AGENTS.md`에 있다.
+- 이 파일과 루트·`client/`의 하네스는 백엔드 작업에 적용되지 않는다. **단, 아래 "함께 지키는 것"은 백엔드도 따른다.**
 
-## 에이전트 하네스
+## 프론트엔드 개발 → 레포 루트에서 시작, `client/` 규칙
 
-| 경로                                         | 내용                                                       |
-| -------------------------------------------- | ---------------------------------------------------------- |
-| `.agents/skills/`                            | 스킬 원본. Codex가 읽고, `.claude/skills/`는 이곳의 링크다 |
-| `tools/agent-hooks/`                         | 훅 스크립트 (Claude Code·Codex 공용)                       |
-| `.claude/settings.json`, `.codex/hooks.json` | 도구별 훅 등록                                             |
-| `lefthook.yml`                               | git hook (커밋 전 lint·format, 커밋 메시지 검사)           |
+- 세션은 **레포 루트에서 시작**한다. 서버 코드도 함께 참고할 수 있다.
+- **`client/AGENTS.md`와 client 하네스를 따른다.** client 하네스는 `client/.agents/skills/`(스킬)와 `client/scripts/agent-hooks/`(훅)이며, 루트 `.claude/settings.json`·`.codex/hooks.json`은 이 훅을 등록만 한다.
+- `server/`의 코드와 문서는 참고만 한다. `server/`의 작업 절차(일지, 슬라이스 등)는 따르지 않고, 사용자가 시키지 않으면 `server/` 파일을 고치지 않는다.
+
+## 함께 지키는 것
+
+FE·BE 모두 같은 규칙과 템플릿을 쓴다. 절차(스킬)는 각 영역 하네스에 있다.
+
+| 항목        | 기준                                             |
+| ----------- | ------------------------------------------------ |
+| 브랜치·커밋 | `client/docs/rules/git-workflow.md`              |
+| PR          | `.github/pull_request_template.md`, squash merge |
+| 이슈        | `.github/ISSUE_TEMPLATE/`                        |
+| AI 금지     | PR 병합, `main` push, force push                 |

@@ -1,6 +1,6 @@
 # Code Review Rule
 
-자동 리뷰(`review-changes` 스킬)와 사람 리뷰가 함께 쓰는 체크리스트다. lint·타입·테스트가 잡는 것은 다시 보지 않는다.
+자동 리뷰(`client-review-changes` 스킬)와 사람 리뷰가 함께 쓰는 체크리스트다. lint·타입·테스트가 잡는 것은 다시 보지 않는다.
 
 ## 체크리스트
 
