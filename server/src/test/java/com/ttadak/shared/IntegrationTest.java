@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 
@@ -15,6 +16,7 @@ import org.springframework.test.context.TestConstructor;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @SpringBootTest
+@Import(PostgresTestConfig.class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public @interface IntegrationTest {
 
