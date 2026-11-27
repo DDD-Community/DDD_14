@@ -1,0 +1,12 @@
+# 운영(CI와 같은 설정): Flyway가 스키마를 만들고 JPA는 검증만 한다.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true

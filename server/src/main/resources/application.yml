@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: ttadak
+  profiles:
+    active: local
+  jpa:
+    open-in-view: false
+  web:
+    resources:
+      add-mappings: false

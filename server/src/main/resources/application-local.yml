@@ -1,0 +1,20 @@
+# 로컬 개발: docker compose의 PostgreSQL(compose.yaml)과 ddl-auto=update
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ttadak
+    username: ttadak
+    password: ttadak
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    com.ttadak: debug
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace

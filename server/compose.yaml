@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: ttadak-postgres
+    environment:
+      POSTGRES_DB: ttadak
+      POSTGRES_USER: ttadak
+      POSTGRES_PASSWORD: ttadak
+    ports:
+      - "5432:5432"
+    volumes:
+      - ttadak-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ttadak -d ttadak"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ttadak-postgres-data:
