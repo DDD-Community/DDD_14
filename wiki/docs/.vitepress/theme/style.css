@@ -202,7 +202,8 @@
 .wiki-comments-box { min-height: 120px; }
 
 /* 정책 번호 링크(#sec-06)로 들어오면 그 줄을 강조한다 */
-.vp-doc li[id] { scroll-margin-top: calc(var(--vp-nav-height) + 24px); }
+/* 위쪽 메뉴와 "이 페이지 목차" 막대에 가리지 않도록 여유를 둔다 */
+.vp-doc li[id] { scroll-margin-top: calc(var(--vp-nav-height) + 72px); }
 .vp-doc .policy li[id]:target {
   margin: 0 -10px;
   padding: 10px;
