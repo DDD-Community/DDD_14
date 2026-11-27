@@ -1,0 +1,73 @@
+name: PR Notify
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  discord:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPO: ${{ github.repository }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_AVATAR: ${{ github.event.pull_request.user.avatar_url }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_FILES: ${{ github.event.pull_request.changed_files }}
+          PR_ADDITIONS: ${{ github.event.pull_request.additions }}
+          PR_DELETIONS: ${{ github.event.pull_request.deletions }}
+        run: |
+          # 변경 파일 경로로 영역 라벨 계산 (중복 허용, 한 번씩만 표시)
+          labels=""
+          add_label() {
+            case " $labels " in *" $1 "*) ;; *) labels="$labels $1" ;; esac
+          }
+          while IFS= read -r file; do
+            case "$file" in
+              client/*) add_label client ;;
+              server/*) add_label server ;;
+              wiki/*) add_label wiki ;;
+              .github/*) add_label ci ;;
+              .agents/*|.claude/*|.codex/*|tools/*|lefthook.yml|skills-lock.json|AGENTS.md|CLAUDE.md) add_label harness ;;
+              *) add_label root ;;
+            esac
+          done < <(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
+
+          label_text=""
+          for l in $labels; do label_text="$label_text\`$l\` "; done
+
+          payload=$(jq -n \
+            --arg title "#$PR_NUMBER $PR_TITLE" \
+            --arg url "$PR_URL" \
+            --arg author "$PR_AUTHOR" \
+            --arg avatar "$PR_AVATAR" \
+            --arg branch "$PR_HEAD → $PR_BASE" \
+            --arg size "$PR_FILES files · +$PR_ADDITIONS −$PR_DELETIONS" \
+            --arg labels "${label_text:-없음}" \
+            --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              embeds: [{
+                title: $title,
+                url: $url,
+                color: 5814783,
+                author: { name: $author, icon_url: $avatar },
+                fields: [
+                  { name: "Labels", value: $labels, inline: false },
+                  { name: "Branch", value: $branch, inline: true },
+                  { name: "변경 규모", value: $size, inline: true }
+                ],
+                timestamp: $ts
+              }]
+            }')
+          curl -fsS -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL"
