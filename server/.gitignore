@@ -1,0 +1,18 @@
+# 하네스가 만드는 임시 산출물(에이전트에게 넘기는 diff, test-author의 노트, PR 설명의 초안)
+_workspace/
+
+# Gradle과 IDE 산출물
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.idea/
+*.iml
+*.log
+
+# 비밀 값
+.env
+.env.*
+!.env.example
+
+# 파이썬 캐시
+__pycache__/
