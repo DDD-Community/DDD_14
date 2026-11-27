@@ -34,6 +34,7 @@
 
 - 페이지마다 맨 아래 댓글 창에 남겨 주세요. GitHub 계정으로 로그인하면 쓸 수 있어요.
 - 정책 번호(예: UPL-03)를 함께 적어 주세요. 댓글은 저장소 [Discussions](https://github.com/soohy00/ttadak-wiki/discussions)에도 모입니다.
+- 정책 한 줄로 바로 보내려면 주소 끝에 `#정책번호`(소문자)를 붙여 링크하세요. 예: `/policy/session-split#sec-06`. 열면 그 줄로 이동하고 노란색으로 강조됩니다.
 
 ## 기준 문서
 

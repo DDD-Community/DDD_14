@@ -6,6 +6,29 @@ export default defineConfig({
   description: '따닥 기획·정책 라이브 위키 (WEB 1팀)',
   base: '/DDD_14_TTADAK/',
   cleanUrls: true,
+  markdown: {
+    // 정책 번호(예: **SEC-06**)로 시작하는 목록 줄에 고유 주소(#sec-06)를 붙인다.
+    // 노션·회의록에서 .../policy/session-split#sec-06 으로 링크하면 그 줄로 이동하고 강조된다.
+    config(md) {
+      md.core.ruler.push('policy_anchor', (state) => {
+        const tokens = state.tokens
+        const seen = new Set<string>()
+        for (let i = 0; i < tokens.length; i++) {
+          if (tokens[i].type !== 'list_item_open') continue
+          const inline = tokens.slice(i + 1, i + 4).find((t) => t.type === 'inline')
+          // 맨 앞의 빈 텍스트 토큰은 건너뛴다
+          const c = inline?.children?.filter((t, k) => !(k === 0 && t.type === 'text' && t.content === ''))
+          if (!c || c[0]?.type !== 'strong_open' || c[1]?.type !== 'text') continue
+          const code = c[1].content.trim()
+          if (!/^[A-Z]{3}-\d{2,3}$/.test(code)) continue
+          const id = code.toLowerCase()
+          if (seen.has(id) || tokens[i].attrGet('id')) continue
+          seen.add(id)
+          tokens[i].attrSet('id', id)
+        }
+      })
+    },
+  },
   lastUpdated: true,
   head: [
     ['link', { rel: 'icon', href: '/DDD_14_TTADAK/favicon.svg' }],
