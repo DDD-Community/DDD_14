@@ -26,7 +26,7 @@ npm run dev
 
 ## 댓글
 
-페이지 아래 댓글(Giscus)은 이관 전 저장소 [soohy00/ttadak-wiki](https://github.com/soohy00/ttadak-wiki/discussions)의 Discussions에 그대로 저장합니다. 그동안 남긴 댓글을 잃지 않으려고 옮기지 않았습니다.
+페이지 아래 댓글(Giscus)은 이관 전 저장소 [soohy00/ttadak-wiki](https://github.com/soohy00/ttadak-wiki/discussions)의 Discussions에 저장합니다. 이 저장소로 옮기려면 DDD-Community 조직에 Giscus 앱을 설치하고 Discussions를 켜야 해서, 그 전까지는 기존 저장소를 씁니다. 옮길 때는 `docs/.vitepress/theme/Comments.vue`의 `data-repo`, `data-repo-id`, `data-category-id`만 바꾸면 됩니다.
 
 ## 라이선스
 
