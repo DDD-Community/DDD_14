@@ -4,6 +4,8 @@
 - 관련: [ADR 0002](../adr/0002-client-folder-structure.md) · [ADR 0003](../adr/0003-client-test-stack.md) · [ADR 0004](../adr/0004-agent-harness.md)
 - 리뷰: 하영님 (아래 "잠정 결정"은 PR 리뷰에서 확정)
 
+> 스킬·훅 위치는 [ADR 0005](../adr/0005-harness-per-area.md)로 바뀌었다. 아래 "구현 위치"는 당시 기준이다.
+>
 > 구현을 마쳤다. 리뷰를 위해 남겨 두었고, 리뷰가 끝나면 수명주기 규칙대로 이 문서와 주제별 문서를 함께 삭제한다. 확정된 내용은 ADR·rules·specs에 있다.
 
 ## 문서 구성

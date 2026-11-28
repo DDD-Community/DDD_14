@@ -2,13 +2,13 @@
 //   ① client 변경이 있으면 verify:fast + 바뀐 파일과 관련된 테스트 → 실패하면 되돌려 고치게 한다
 //      같은 작업에서 3번 넘게 실패하면 더 막지 않는다 (lefthook·CI가 다시 잡는다)
 //   ② 통과하면 변경 내용을 보고 필요한 스킬을 골라 한 번에 요청한다 (같은 변경에는 한 번만)
-//      - client/src를 바꿨는데 plan이 없음 → new-feature
-//      - 화면 파일(.tsx, .css)을 바꿈 → verify-ui
-//      - 새 의존성 추가 → write-adr
-//      - 항상 → review-changes
+//      - client/src를 바꿨는데 plan이 없음 → client-new-feature
+//      - 화면 파일(.tsx, .css)을 바꿈 → client-verify-ui
+//      - 새 의존성 추가 → client-write-adr
+//      - 항상 → client-review-changes
 // 끄기: TTADAK_STOP_GATE=0 (전체), TTADAK_AUTO_SKILLS=0 (스킬 요청만. 검증은 계속 돈다)
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import {
   activePlans,
@@ -20,6 +20,7 @@ import {
   readInput,
   repoRoot,
   run,
+  skill,
   tail,
 } from './lib.mjs';
 
@@ -81,11 +82,19 @@ if (process.env.TTADAK_AUTO_SKILLS === '0') {
 }
 
 // ② 스킬 요청
+// 변경 지문. 심볼릭 링크는 가리키는 경로로, 폴더는 이름만, 지워진 파일은 표시만 남긴다.
 const fingerprint = (files) => {
   const hash = createHash('sha1');
   for (const f of files) {
     const file = path.join(root, f);
-    hash.update(f).update(existsSync(file) ? readFileSync(file) : '');
+    hash.update(f);
+    try {
+      const stat = lstatSync(file);
+      if (stat.isSymbolicLink()) hash.update(`link:${readlinkSync(file)}`);
+      else if (stat.isFile()) hash.update(readFileSync(file));
+    } catch {
+      hash.update('(deleted)');
+    }
   }
   return hash.digest('hex');
 };
@@ -116,12 +125,14 @@ const hasPlan =
   activePlans(root).length > 0 || changed.some((f) => f.startsWith('client/docs/plans/'));
 const tasks = [];
 if (changed.some((f) => f.startsWith('client/src/')) && !hasPlan)
-  tasks.push('new-feature 스킬 절차대로 이번 작업의 plan을 client/docs/plans/에 남기세요.');
+  tasks.push(
+    `${skill('client-new-feature')} 절차대로 이번 작업의 plan을 client/docs/plans/에 남기세요.`,
+  );
 if (uiFiles.length && done.ui !== current.ui)
-  tasks.push('verify-ui 스킬로 바뀐 화면을 브라우저에서 확인하세요.');
+  tasks.push(`${skill('client-verify-ui')}로 바뀐 화면을 브라우저에서 확인하세요.`);
 if (newDeps.length && done.deps !== current.deps)
-  tasks.push(`새 의존성(${newDeps.join(', ')})을 write-adr 스킬로 ADR에 기록하세요.`);
-tasks.push('review-changes 스킬로 이번 변경을 독립 리뷰하고 지적을 반영하세요.');
+  tasks.push(`새 의존성(${newDeps.join(', ')})을 ${skill('client-write-adr')}로 ADR에 기록하세요.`);
+tasks.push(`${skill('client-review-changes')}로 이번 변경을 독립 리뷰하고 지적을 반영하세요.`);
 
 save({ done, pending: true });
 block(`검증 통과. 끝내기 전에 차례로 하세요.\n${tasks.map((t, i) => `${i + 1}. ${t}`).join('\n')}`);

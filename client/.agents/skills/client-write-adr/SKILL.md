@@ -1,5 +1,5 @@
 ---
-name: write-adr
+name: client-write-adr
 description: 기술 선택이나 구조 결정을 ADR로 기록할 때 쓴다. 새 의존성을 추가했거나 spec을 크게 바꿨을 때, stop-gate 훅이 요청했을 때 쓴다.
 ---
 

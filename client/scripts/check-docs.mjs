@@ -20,8 +20,8 @@ const walk = (dir) =>
 
 // 1. 상대 링크 (코드 블록 안은 예시이므로 건너뛴다)
 const repoRoot = path.resolve(clientDir, '..');
-const skillsDir = path.join(repoRoot, '.agents/skills');
-const lockPath = path.join(repoRoot, 'skills-lock.json');
+const skillsDir = path.join(clientDir, '.agents/skills');
+const lockPath = path.join(clientDir, 'skills-lock.json');
 const externalSkills = new Set([
   'playwright-cli', // playwright-cli install --skills 로 설치
   ...Object.keys(existsSync(lockPath) ? JSON.parse(readFileSync(lockPath, 'utf8')).skills : {}),

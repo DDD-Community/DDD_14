@@ -53,6 +53,9 @@ export const changedFiles = (root) => {
   ];
 };
 
+/** 스킬 안내: 이름과 SKILL.md 경로. 스킬을 자동으로 찾지 못하는 도구도 경로를 읽고 따를 수 있다. */
+export const skill = (name) => `${name} 스킬(client/.agents/skills/${name}/SKILL.md)`;
+
 /** 상태가 "진행 중"인 plan 파일 목록 */
 export const activePlans = (root) => {
   const dir = path.join(root, 'client/docs/plans');
